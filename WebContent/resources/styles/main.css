@@ -1,0 +1,80 @@
+/* Setting style variables */
+:root { -
+	--main-bg-color: #f9f9d3;
+	--main-dark-color: #1f386b;
+	--banner-height: 100px;
+}
+
+/* The styles for the elements */
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 85%;
+	margin-left: 2em;
+	margin-right: 2em;
+	width: 400px;
+}
+
+h1 {
+	font-size: 140%;
+	color: teal;
+	margin-bottom: .5em;
+}
+
+h2 {
+	font-size: 120%;
+	color: teal;
+	margin-bottom: .5em;
+}
+
+label {
+	float: left;
+	width: 7em;
+	margin-bottom: 0.5em;
+	font-weight: bold;
+}
+
+input[type="text"], input[type="email"] { /* An attribute selector */
+	width: 15em;
+	margin-left: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+span {
+	margin-left: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+br {
+	clear: both;
+}
+
+/* The styles for the classes */
+.pad_top {
+	padding-top: 0.25em;
+}
+
+.margin_left {
+	margin-left: 0.5em;
+}
+
+.banner {
+	height: var(--banner-height);
+}
+
+.errorMsg{
+	color: red;
+	font-style: italic;
+}
+
+/* The styles for specific objects */
+#hopkinsImg {
+	height: var(--banner-height);
+	float: left;
+}
+
+#bannerRight {
+	background-image: linear-gradient(to right, var(--main-dark-color),
+		black);
+	height: var(--banner-height);
+	overflow: hidden;
+}
