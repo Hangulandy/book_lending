@@ -148,6 +148,8 @@ public class BookAppServlet extends HttpServlet {
 		
 		// TODO - set session attributes?
 		getServletContext().getRequestDispatcher(url).forward(request, response);
+		
+		System.out.println("This is a test for github.");
 	}
 
 	private Book buildBookFromData(HttpServletRequest request, Member member) {
