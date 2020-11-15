@@ -1,6 +1,9 @@
 package com.bookapp.business;
 
-public class Book {
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
+public class Book implements Comparable<Book> {
 
 	private int id;
 	private String title;
@@ -53,10 +56,12 @@ public class Book {
 		return pages;
 	}
 
+	//FIXME: IS there a reason that this comes in as a String?
 	public void setPages(String pages) {
 		this.pages = myParseInt(pages, 10);
 	}
 
+	//FIXME: This is producing strange output?
 	public int getRecommendedAge() {
 		if (recommendedAge == 0) {
 			recommendedAge = 10;
@@ -126,8 +131,44 @@ public class Book {
 		errorMsg = sb.toString();
 	}
 	
-	// TODO - comparator for books (first by title, then by author, then by owner)
+	//This is mostly for testing and debugging
+	@Override
+	public String toString() {
+		String delim =",";
+		return (
+				getId() + delim + 
+			    getTitle() + delim + 
+				getAuthor() + delim + 
+			    getPages() + delim + 
+				getRecommendedAge() + delim +
+			    getOwnerId() + delim + 
+				getHolderId() + delim + 
+			    isLendable()
+				);
+	}
 	
-	// TODO - equals for books
+	@Override
+	public int compareTo(Book otherBook) {
+		return new CompareToBuilder()
+				.append(this.title, otherBook.getTitle())
+				.append(this.author, otherBook.getAuthor())
+				.append(this.ownerId, otherBook.getOwnerId())
+				.toComparison();
+	}
+
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		
+		Book otherBook = (Book) o;
+		
+		return new EqualsBuilder()
+			.append(this.title, otherBook.getTitle())
+			.append(this.author, otherBook.getAuthor())
+			.append(this.ownerId, otherBook.getOwnerId())
+			.isEquals();
+	}
 
 }

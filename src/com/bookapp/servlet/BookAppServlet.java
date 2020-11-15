@@ -142,7 +142,70 @@ public class BookAppServlet extends HttpServlet {
 				}
 				setSessionAttributes(session, member, message);
 			}
+			
+			// ACTION: Edit a book
+			if (action.equalsIgnoreCase("editBook")) {
+				member = MemberDB.checkLogin(member);
+				
+				if (member != null && member.isLoggedIn()) {
+					int bookIdToEdit = Integer.parseInt(request.getParameter("bookIdToEdit"));
+					Book bookToEdit = BookDB.selectBookById(bookIdToEdit);
+					
+					//Check that the book exists and person editing the book is the owner
+					if (bookToEdit != null && bookToEdit.getOwnerId() == member.getId()) {
+						url = "/editBook.jsp";
+						
+						//No need to keep this in the session
+						request.setAttribute("bookToEdit", bookToEdit);
+					} else {
+						//TODO ERROR MESSAGE
+					}
+					
+				}
+			}
+			// ACTION: Update book
+			if (action.equalsIgnoreCase("updateBook")) {
+				System.out.println("UPDATING BOOK");
+				member = MemberDB.checkLogin(member);
+				int bookId = Integer.parseInt(request.getParameter("bookId"));
+				if (member != null && member.isLoggedIn()) {
+					Book oldBook = BookDB.selectBookById(bookId);
 
+					if (oldBook != null && oldBook.getOwnerId() == member.getId()) {
+						Book updatedBook = buildBookFromData(request, member);
+						// Get values from book before updating
+						updatedBook.setId(bookId);
+						updatedBook.setHolderId(oldBook.getHolderId());
+						updatedBook.setLendable(oldBook.isLendable());
+
+						System.out.println("UPDATING BOOK --> " + updatedBook.toString());
+
+						int updated = BookDB.update(updatedBook);
+					}
+				}
+				//TODO add some error message if ifs are false
+				
+				url = "/manage_books.jsp";
+			}
+			
+			// ACTION: Delete a book
+			if (action.equalsIgnoreCase("deleteBook")) {
+				System.out.println("DELETING BOOK");
+				member = MemberDB.checkLogin(member);
+				int bookId = Integer.parseInt(request.getParameter("bookId"));
+				if (member != null && member.isLoggedIn()) {
+					Book bookToDelete = BookDB.selectBookById(bookId);
+
+					if (bookToDelete != null && bookToDelete.getOwnerId() == member.getId()) {
+						int deleted = BookDB.delete(bookToDelete);
+						System.out.println("Deleted Book " + deleted);
+					}
+				}
+				//TODO add some error message if ifs are false
+				url = "/manage_books.jsp";
+
+			}
+			
 			// OTHER ACTIONS GO HERE
 		}
 		
