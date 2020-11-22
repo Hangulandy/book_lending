@@ -31,8 +31,14 @@
         <label class="pad_top">Rec. Age:</label>
         <input type="number" name="recommendedAge" value="${bookToEdit.recommendedAge}" min="1">
         <br>
+        <label class="pad_top">Lendable</label>
+        <select ${bookToEdit.ownerId != bookToEdit.holderId ? 'disabled' : '' }>
+        	<option>Yes</option>
+        	<option>No</option>
+        </select>
         <hr>
         <label>&nbsp;</label>
-        <input type="submit" value="Edit" class="margin_left" />
+	    <input type="submit" value="Edit" class="margin_left" />
     </form>
+        <a href="manage_books.jsp">Go Back</a>
 </c:if>

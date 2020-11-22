@@ -130,10 +130,14 @@ public class BookAppServlet extends HttpServlet {
 					book = buildBookFromData(request, member);
 					
 					if (book.getErrorMsg().equalsIgnoreCase("")) {
-						int result = BookDB.insert(book);
-						if (result != 0) {
-							message = String.format("%s was successfully added to the database. ", book.getTitle());
-							url = "/manage_books.jsp";
+						url = "/manage_books.jsp";
+						if (BookDB.bookExists(book)) {
+							message = String.format("%s already exists in the database", book.getTitle());
+						} else {
+							int result = BookDB.insert(book);
+							if (result != 0) {
+								message = String.format("%s was successfully added to the database. ", book.getTitle());
+							}
 						}
 					}
 				} else {

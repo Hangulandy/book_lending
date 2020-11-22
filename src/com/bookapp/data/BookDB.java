@@ -40,6 +40,37 @@ public class BookDB {
 	}
 	
 	/**
+	 * Check if book already exists for owner in DB
+	 * @param boolean
+	 * @return
+	 */
+	public static boolean bookExists(Book book) {
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		String query = "SELECT * FROM Book WHERE TITLE = ? AND ownerId = ?";
+		
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setString(1, book.getTitle());
+			ps.setInt(2, book.getOwnerId());
+			rs = ps.executeQuery();
+			return rs.next();
+			
+		} catch (SQLException e) {
+			System.out.println(e);
+			return false;
+		} finally {
+			DBUtil.closeResultSet(rs);
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+	}
+	
+	
+	/**
 	 * Get book by title
 	 * @param title
 	 * @return
@@ -253,7 +284,7 @@ try {
 			book.setAuthor(rs.getString("author"));
 			//FIXME  string or int?
 			book.setPages(Integer.toString(rs.getInt("pages")));
-			book.setRecommendedAge(Integer.toBinaryString(rs.getInt("recommendedAge")));
+			book.setRecommendedAge(Integer.toString(rs.getInt("recommendedAge")));
 			book.setOwnerId(rs.getInt("ownerId"));
 			book.setHolderId(rs.getInt("holderId"));
 			book.setLendable(BooleanUtils.toBoolean(rs.getInt("lendable")));
