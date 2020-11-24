@@ -4,7 +4,7 @@
 <p>Choose one:</p>
 
 <form action="BookAppServlet" method="post">
-    <input type="text" name="searchText" placeholder="Search" required></input>
+    <input type="text" name="searchString" placeholder="Title or Author" required></input>
     <input type="submit" value="Search Books" />
     <input type="hidden" name="action" value="search" />
 </form>

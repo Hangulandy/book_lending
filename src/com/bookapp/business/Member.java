@@ -3,13 +3,13 @@ package com.bookapp.business;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
-public class Member implements Serializable {
+public class Member implements Serializable, Comparable<Member> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int id;
+	private Integer id;
 	private String email;
 	private String firstName;
 	private String lastName;
@@ -36,7 +36,7 @@ public class Member implements Serializable {
 		setLoggedIn(false);
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -172,6 +172,11 @@ public class Member implements Serializable {
 
 	public String toString() {
 		return String.format("Member %s %s with username %s", getFirstName(), getLastName(), getUserName());
+	}
+
+	@Override
+	public int compareTo(Member other) {
+		return getId().compareTo(other.getId());
 	}
 
 }
