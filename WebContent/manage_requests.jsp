@@ -8,11 +8,12 @@
 
 <c:if test="${member.isLoggedIn() == true}">
     <p>Logged In as ${member.userName}</p>
+
+    <c:import url="/resources/includes/requests_to_me.jsp" />
+    <c:import url="/resources/includes/requests_to_others.jsp" />
 </c:if>
 
 
 <c:import url="/resources/includes/options.jsp" />
-
-<c:import url="/resources/includes/search_results.jsp" />
 
 <c:import url="/resources/includes/footer.html" />
