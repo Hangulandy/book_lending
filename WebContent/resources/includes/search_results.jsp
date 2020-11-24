@@ -6,20 +6,20 @@
     <h1>Recent Search Results:</h1>
     <table>
         <tr>
-            <th>Title</th>
+            <th class="left">Title</th>
             <th>Author</th>
             <th>Pages</th>
             <th>Rec. Age</th>
             <th>
                 <form>
-                    <input type="submit" value="Clear Results" />
+                    <input class="redButton" type="submit" value="Clear Results" />
                     <input type="hidden" name="action" value="clearBooks" />
                 </form>
             </th>
         </tr>
         <c:forEach items="${books}" var="book">
             <tr>
-                <td>${book.title}</td>
+                <td class="left">${book.title}</td>
                 <td>${book.author}</td>
                 <td>${book.pages}</td>
                 <td>${book.id}</td>
@@ -29,7 +29,7 @@
                                 value="requestBook" />
                             <input type="hidden" name="bookRequested"
                                 value="${book.id}" />
-                            <input class="button" type="submit" value="Request" />
+                            <input class="button" type="submit" value="Request Book" />
                         </form>
                     </c:if>
                     <c:if test="${book.owner.id == member.id}"><i>This is your book.</i></c:if></td>                    

@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<c:import url="/resources/includes/header.html" />
+<c:import url="/resources/includes/header.jsp" />
 
 <h1>Join our community</h1>
 <p>To become a basic member of our book-lending group, enter your
@@ -38,7 +38,5 @@
     <label>&nbsp;</label>
     <input type="submit" value="Join Now" class="margin_left" />
 </form>
-
-<c:import url="/resources/includes/options.jsp" />
 
 <c:import url="/resources/includes/footer.html" />

@@ -340,7 +340,6 @@ public class BookAppServlet extends HttpServlet {
 		// TODO - verify with the book class that this is a valid book id
 		if (true) {
 
-			// TODO - change requestExists to openRequestExists
 			if (!RequestDB.requestExists(idAsInt, member)) {
 				System.out.println("There is not a previous request. ");
 				int result = RequestDB.insert(idAsInt, member);

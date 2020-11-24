@@ -13,5 +13,5 @@
     <label class="pad_top">Password:</label>
     <input type="password" name="password" required />
     <br>
-    <input type="submit" value="Login" class="margin_left" />
+    <input class="button" type="submit" value="Login" class="margin_left" />
 </form>

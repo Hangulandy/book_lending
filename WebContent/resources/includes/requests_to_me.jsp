@@ -3,12 +3,12 @@
 
 <p>${message}</p>
 
-<h1>Requests to Me:</h1>
+<h1>Requests for Your Books:</h1>
 
 <c:if test="${requestsToMe != null && requestsToMe.size() > 0}">
     <table>
         <tr>
-            <th>Title</th>
+            <th class="left">Title</th>
             <th>Author</th>
             <th>Requester</th>
             <th>Email</th>
@@ -20,21 +20,21 @@
         </tr>
         <c:forEach items="${requestsToMe}" var="request">
             <tr>
-                <td>${request.book.title}</td>
+                <td class="left">${request.book.title}</td>
                 <td>${request.book.author}</td>
                 <td>${request.requester.userName}</td>
                 <td>${request.requester.email}</td>
                 <td>${request.dateRequested}</td>
                 <td><c:choose>
                         <c:when test="${request.getStage() == 1}">
-                            <form action="BookAppServlet" method="get">
+                            <form class="sideBySide" action="BookAppServlet" method="get">
                                 <input type="hidden" name="action"
                                     value="approve" />
                                 <input type="hidden" name="requestId"
                                     value="${request.id}" />
                                 <input class="button" type="submit" value="OK" />
                             </form>
-                            <form action="BookAppServlet" method="get">
+                            <form class="sideBySide" action="BookAppServlet" method="get">
                                 <input type="hidden" name="action" value="deny" />
                                 <input type="hidden" name="requestId"
                                     value="${request.id}" />
