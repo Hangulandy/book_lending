@@ -114,6 +114,11 @@ table {
   	display: inline;
 }
 
+.button:hover, .redButton:hover {
+	background-color: white;
+	color: black;
+}
+
 .redButton {
   	font: bold 11px Arial;
   	text-decoration: none;
@@ -126,6 +131,8 @@ table {
   	border-left: 1px solid #CCCCCC;
   	display: inline;
 }
+
+
 
 .sideBySide {
 	display: inline;

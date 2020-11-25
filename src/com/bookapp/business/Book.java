@@ -1,6 +1,7 @@
 package com.bookapp.business;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class Book implements Serializable, Comparable<Book> {
 
@@ -158,6 +159,19 @@ public class Book implements Serializable, Comparable<Book> {
 		}
 
 		return getOwner().compareTo(other.getOwner());
+	}
+	
+	public boolean isInRequestSet(Set<Request> set) {
+		
+		if (set != null) {
+			for (Request request : set) {
+				if (this.getId() == request.getBook().getId() && request.isOpen()) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 
 }

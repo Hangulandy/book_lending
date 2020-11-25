@@ -138,4 +138,8 @@ public class Request implements Serializable, Comparable<Request> {
 		return getId().compareTo(other.getId());
 	}
 
+	public boolean isOpen() {
+		return stage != 4;
+	}
+
 }

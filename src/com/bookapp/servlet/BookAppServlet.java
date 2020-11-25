@@ -124,7 +124,10 @@ public class BookAppServlet extends HttpServlet {
 				TreeSet<Book> books = BookDB.search(searchString);
 				session.setAttribute("searchBooks", books);
 				session.setAttribute("searchMessage", String.format("Your search returned %d results. ", books.size()));
-
+				
+				if (memberLoginGood(member)) {
+					session.setAttribute("requestsToOthers", RequestDB.getRequestsToOthers(member.getId()));
+				}
 				url = "/index.jsp";
 			}
 
@@ -151,8 +154,8 @@ public class BookAppServlet extends HttpServlet {
 				session.setAttribute("message", message);
 			}
 
-			// ACTION: Clear search results (clearBooks)
-			if (action.equalsIgnoreCase("clearBooks")) {
+			// ACTION: Clear search results (clearSearch)
+			if (action.equalsIgnoreCase("clearSearch")) {
 				session.setAttribute("searchBooks", null);
 				session.setAttribute("searchMessage", null);
 			}
@@ -160,6 +163,11 @@ public class BookAppServlet extends HttpServlet {
 			// ACTION: Request a book
 			if (action.equalsIgnoreCase("requestBook")) {
 				session.setAttribute("message", submitRequestToBorrow(request, member));
+				
+				if (memberLoginGood(member)) {
+					session.setAttribute("requestsToOthers", RequestDB.getRequestsToOthers(member.getId()));
+				}
+				
 			}
 
 			// ACTION: Manage Requests

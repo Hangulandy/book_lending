@@ -4,7 +4,7 @@
 <c:if test="${searchBooks != null}">
     <form class="sideBySide">
         <input class="redButton" type="submit" value="Clear Results" />
-        <input type="hidden" name="action" value="clearBooks" />
+        <input type="hidden" name="action" value="clearSearch" />
     </form>
 </c:if>
 
@@ -17,7 +17,7 @@
             <th>Pages</th>
             <th>Rec. Age</th>
             <c:if test="${member.isLoggedIn() == true}">
-                <th>Status</th>
+                <th>Request</th>
             </c:if>
         </tr>
         <c:forEach items="${searchBooks}" var="book">
@@ -27,6 +27,12 @@
                 <td>${book.pages}</td>
                 <td>${book.recommendedAge}</td>
                 <c:choose>
+                    <c:when test="${book.owner.id == member.id}">
+                        <td><i>This is your book.</i></td>
+                    </c:when>
+                    <c:when test="${book.isInRequestSet(requestsToOthers)}">
+                        <td>Pending Request</td>
+                    </c:when>
                     <c:when
                         test="${member.isLoggedIn() == true && member.canLendAndBorrow() && book.owner.id != member.id && book.lendable && book.owner.canLendAndBorrow()}">
                         <td>
@@ -39,9 +45,6 @@
                                     value="Request Book" />
                             </form>
                         </td>
-                    </c:when>
-                    <c:when test="${book.owner.id == member.id}">
-                        <td><i>This is your book.</i></td>
                     </c:when>
                 </c:choose>
             </tr>

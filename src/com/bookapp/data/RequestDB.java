@@ -20,9 +20,7 @@ public class RequestDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT id FROM Request WHERE bookId = ? "
-				+ "AND requesterId = ?"
-				+ "AND dateClosedByOwner IS NULL";
+		String query = "SELECT id FROM Request WHERE bookId = ? AND requesterId = ? AND dateClosedByOwner IS NULL";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, id);
@@ -50,7 +48,7 @@ public class RequestDB {
 
 		Date sqlDate = new java.sql.Date(date.getTime());
 
-		String query = "INSERT INTO Request (bookId, requesterId, dateRequested) " + "VALUES (?, ?, ?)";
+		String query = "INSERT INTO Request (bookId, requesterId, dateRequested) VALUES (?, ?, ?)";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, idAsInt);
@@ -74,10 +72,7 @@ public class RequestDB {
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 
-		String query = "SELECT * FROM Request AS r "
-				+ "INNER JOIN Book AS b ON r.bookId = b.id "
-				+ "INNER JOIN Member AS m ON r.requesterId = m.id "
-				+ "WHERE b.ownerId = ?";
+		String query = "SELECT * FROM Request AS r INNER JOIN Book AS b ON r.bookId = b.id INNER JOIN Member AS m ON r.requesterId = m.id WHERE b.ownerId = ?";
 
 		try {
 			ps = connection.prepareStatement(query);
@@ -125,10 +120,7 @@ public class RequestDB {
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 
-		String query = "SELECT * FROM Request AS r "
-				+ "INNER JOIN Book AS b ON r.bookId = b.id "
-				+ "INNER JOIN Member AS owner ON b.ownerId = owner.id "
-				+ "WHERE r.requesterId = ?";
+		String query = "SELECT * FROM Request AS r INNER JOIN Book AS b ON r.bookId = b.id INNER JOIN Member AS owner ON b.ownerId = owner.id WHERE r.requesterId = ?";
 
 		try {
 			ps = connection.prepareStatement(query);
@@ -215,9 +207,7 @@ public class RequestDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Request AS r "
-				+ "JOIN Book as b ON r.bookId = b.id "
-				+ "WHERE b.ownerId = ? AND r.id = ?";
+		String query = "SELECT * FROM Request AS r JOIN Book as b ON r.bookId = b.id WHERE b.ownerId = ? AND r.id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, member.getId());
@@ -309,7 +299,7 @@ public class RequestDB {
 		}
 		return false;
 	}
-	
+
 	public static boolean returnBook(Member member, String parameter) {
 
 		int requestId = 0;
@@ -319,7 +309,7 @@ public class RequestDB {
 		} catch (NumberFormatException e) {
 			return false;
 		}
-		
+
 		// Make sure this member has authority to modify this request
 		if (!isRequestToMe(member, requestId)) {
 			return false;
@@ -382,7 +372,7 @@ public class RequestDB {
 			pool.freeConnection(connection);
 		}
 		return false;
-		
+
 	}
 
 }

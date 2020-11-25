@@ -41,7 +41,7 @@ public class MemberDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT email FROM Member " + "WHERE email = ?";
+		String query = "SELECT email FROM Member WHERE email = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, email);
@@ -159,7 +159,7 @@ public class MemberDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Book AS b JOIN Member AS m JOIN AccountType AS a ON m.accountType = a.id WHERE b.ownerId = m.id AND b.id = ?";
+		String query = "SELECT * FROM Book AS b JOIN Member AS o ON b.ownerId = o.id JOIN AccountType AS a ON o.accountType = a.id WHERE b.id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, bookId);
@@ -168,8 +168,8 @@ public class MemberDB {
 			while (rs.next()) {
 
 				AccountType accountType = new AccountType();
-				accountType.setId(rs.getInt(17));
-				accountType.setTitle(rs.getString(18));
+				accountType.setId(rs.getInt(16));
+				accountType.setTitle(rs.getString(17));
 
 				int id = rs.getInt(9);
 				String email = rs.getString(10);
