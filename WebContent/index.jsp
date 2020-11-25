@@ -6,6 +6,8 @@
     <c:import url="/resources/includes/login.jsp" />
 </c:if>
 
+<p>${message}</p>
+
 <c:import url="/resources/includes/search_results.jsp" />
 
 <c:import url="/resources/includes/footer.html" />

@@ -2,6 +2,8 @@
 
 <c:import url="/resources/includes/header.jsp" />
 
+<p>${requestMessage}</p>
+
 <c:if test="${member.isLoggedIn() == false || member == null}">
     <c:import url="/resources/includes/login.jsp" />
 </c:if>

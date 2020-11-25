@@ -12,7 +12,6 @@ import javax.servlet.http.HttpSession;
 
 import com.bookapp.business.Book;
 import com.bookapp.business.Member;
-import com.bookapp.business.Request;
 import com.bookapp.data.BookDB;
 import com.bookapp.data.MemberDB;
 import com.bookapp.data.RequestDB;
@@ -48,21 +47,21 @@ public class BookAppServlet extends HttpServlet {
 
 		// defaults
 		String url = "/index.jsp";
-		String message = "";
 
 		// get session object
 		HttpSession session = request.getSession();
 		final Object lock = session.getId().intern();
 
-		// initialize variables to be used as session attributes
-		Member member;
-		TreeSet<Book> books;
-
 		synchronized (lock) {
 
-			// get attributes from existing session
-			member = (Member) session.getAttribute("member");
-			books = (TreeSet<Book>) session.getAttribute("books");
+			// Reset all messages from previous requests;
+			session.setAttribute("message", null);
+			session.setAttribute("requestMessage", null);
+			session.setAttribute("loginMessage", null);
+			session.setAttribute("joinMessage", null);
+
+			// get member attribute from existing session
+			Member member = (Member) session.getAttribute("member");
 
 			// ACTION: HOME
 			if (action.equalsIgnoreCase("home")) {
@@ -76,65 +75,66 @@ public class BookAppServlet extends HttpServlet {
 
 			// ACTION: LOGIN
 			if (action.equalsIgnoreCase("login")) {
+
 				String email = request.getParameter("email");
 				String password = request.getParameter("password");
+				String loginMessage = null;
 				member = MemberDB.login(email, password);
 
 				if (member == null) {
-					message = "Could not find that user in the database. Check your credentials and try again, or join our community.";
+					loginMessage = "Could not find that user in the database. Check your credentials and try again, or join our community.";
 				} else {
-					System.out.println("Member is logged in as " + member.toString());
+					loginMessage = "Member is logged in as " + member.toString();
 				}
+				session.setAttribute("loginMessage", loginMessage);
+				session.setAttribute("member", member);
 			}
 
 			// ACTION: JOIN
 			if (action.equalsIgnoreCase("join")) {
 
-				// Validate proper information exists - what information do we need? what order
-				// should we check?
-				// Completeness of join form is all that matters
-				// Build the member object
-				// Check the DB that it doesn't already exist (by email)
-				// Insert member into DB
-				// Return to login
-
-				// 1. Validate necessary information
-				// 2. Perform the task
-				// 3. Redirect
-
-				System.out.println("Inside JOIN");
-				member = buildMemberData(request);
+				String joinMessage = null;
+				member = buildMemberFromRequest(request);
 
 				if (member.getErrorMsg().equalsIgnoreCase("")) {
 					if (MemberDB.emailExists(member.getEmail())) {
-						message = "There is already a membership associated with that email address.";
+						joinMessage = "There is already a membership associated with that email address.";
 						url = "/join.jsp";
 					} else {
 						int result = MemberDB.insert(member);
 						if (result != 0) {
-							message = "";
 							url = "/join_success.jsp";
 						} else {
-							message = "There was an error joining. Try again. ";
+							joinMessage = "There was an error joining. Try again. ";
 							url = "/join.jsp";
 						}
 					}
 				}
+				session.setAttribute("member", member);
+				session.setAttribute("joinMessage", joinMessage);
 			}
 
+			// ACTION: Search
 			if (action.equalsIgnoreCase("search")) {
-				String searchString = "";
-				searchString = request.getParameter("searchString") != null ? request.getParameter("searchString") : "";
-				books = BookDB.search(searchString);
+
+				String searchString = request.getParameter("searchString") != null
+						? request.getParameter("searchString")
+						: "";
+
+				TreeSet<Book> books = BookDB.search(searchString);
+				session.setAttribute("searchBooks", books);
+				session.setAttribute("searchMessage", String.format("Your search returned %d results. ", books.size()));
+
 				url = "/index.jsp";
 			}
 
 			// ACTION: Register a book
 			if (action.equalsIgnoreCase("registerBook")) {
 
-				member = MemberDB.checkLogin(member);
+				String message = null;
 				Book book = null;
-				if (member != null && member.isLoggedIn()) {
+
+				if (memberLoginGood(member)) {
 					book = buildBookFromData(request, member);
 
 					if (book.getErrorMsg().equalsIgnoreCase("")) {
@@ -148,45 +148,44 @@ public class BookAppServlet extends HttpServlet {
 					message = "You need to login to add books. ";
 					url = "/login.jsp";
 				}
+				session.setAttribute("message", message);
 			}
 
 			// ACTION: Clear search results (clearBooks)
 			if (action.equalsIgnoreCase("clearBooks")) {
-				books = null;
+				session.setAttribute("searchBooks", null);
+				session.setAttribute("searchMessage", null);
 			}
 
-			// ACTION: Request book
+			// ACTION: Request a book
 			if (action.equalsIgnoreCase("requestBook")) {
-				message = submitRequestToBorrow(request, member);
+				session.setAttribute("message", submitRequestToBorrow(request, member));
 			}
 
 			// ACTION: Manage Requests
 			if (action.equalsIgnoreCase("manageRequests")) {
 
-				System.out.println("Inside manage requests");
+				String requestMessage = null;
 
-				// first, must check login again
-				member = MemberDB.checkLogin(member);
-				if (member.isLoggedIn()) {
-
-					System.out.println("Member is logged in");
+				if (memberLoginGood(member)) {
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
 					session.setAttribute("requestsToOthers", RequestDB.getRequestsToOthers(member.getId()));
 
 					url = "/manage_requests.jsp";
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
 					url = "/login.jsp";
 				}
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Approve request
 			if (action.equalsIgnoreCase("approve")) {
 
-				member = MemberDB.checkLogin(member);
+				String requestMessage = null;
 
-				if (member.isLoggedIn()) {
+				if (memberLoginGood(member)) {
 					boolean success = RequestDB.approve(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
@@ -195,23 +194,23 @@ public class BookAppServlet extends HttpServlet {
 					url = "/manage_requests.jsp";
 
 					if (success) {
-						message = "The request was approved. ";
+						requestMessage = "The request was approved. ";
 					} else {
-						message = "There was an error approving the request. Please try again. ";
+						requestMessage = "There was an error approving the request. Please try again. ";
 					}
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
-					url = "/login.jsp";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
+					url = "/index.jsp";
 				}
-
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Deny request
 			if (action.equalsIgnoreCase("deny")) {
 
-				member = MemberDB.checkLogin(member);
+				String requestMessage = null;
 
-				if (member.isLoggedIn()) {
+				if (memberLoginGood(member)) {
 					boolean success = RequestDB.deny(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
@@ -220,22 +219,23 @@ public class BookAppServlet extends HttpServlet {
 					url = "/manage_requests.jsp";
 
 					if (success) {
-						message = "The request was declined. ";
+						requestMessage = "The request was declined. ";
 					} else {
-						message = "There was an error declining the request. Please try again. ";
+						requestMessage = "There was an error declining the request. Please try again. ";
 					}
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
 					url = "/login.jsp";
 				}
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Receive book (as requester)
 			if (action.equalsIgnoreCase("receive")) {
 
-				member = MemberDB.checkLogin(member);
+				String requestMessage = null;
 
-				if (member.isLoggedIn()) {
+				if (memberLoginGood(member)) {
 					boolean success = RequestDB.receive(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
@@ -244,22 +244,23 @@ public class BookAppServlet extends HttpServlet {
 					url = "/manage_requests.jsp";
 
 					if (success) {
-						message = "The the book has been marked 'received'. ";
+						requestMessage = "The the book has been marked 'received'. ";
 					} else {
-						message = "There was an error updating the book as received. Please try again. ";
+						requestMessage = "There was an error updating the book as received. Please try again. ";
 					}
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
 					url = "/login.jsp";
 				}
+				session.setAttribute("requestMessage", requestMessage);
 			}
-			
+
 			// ACTION: Cancel book (as requester)
 			if (action.equalsIgnoreCase("cancelRequest")) {
-				
-				member = MemberDB.checkLogin(member);
 
-				if (member.isLoggedIn()) {
+				String requestMessage = null;
+
+				if (memberLoginGood(member)) {
 					boolean success = RequestDB.cancelRequest(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
@@ -268,24 +269,23 @@ public class BookAppServlet extends HttpServlet {
 					url = "/manage_requests.jsp";
 
 					if (success) {
-						message = "The the request has been marked 'Canceled by Requester'. ";
+						requestMessage = "The the request has been marked 'Canceled by Requester'. ";
 					} else {
-						message = "There was an error updating the request as canceled. Please try again. ";
+						requestMessage = "There was an error updating the request as canceled. Please try again. ";
 					}
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
 					url = "/login.jsp";
 				}
-				
-				
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Return Book to Owner
 			if (action.equalsIgnoreCase("returnBook")) {
 
-				member = MemberDB.checkLogin(member);
+				String requestMessage = null;
 
-				if (member.isLoggedIn()) {
+				if (memberLoginGood(member)) {
 					boolean success = RequestDB.returnBook(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));
@@ -294,67 +294,71 @@ public class BookAppServlet extends HttpServlet {
 					url = "/manage_requests.jsp";
 
 					if (success) {
-						message = "The book has been marked 'returned'. ";
+						requestMessage = "The book has been marked 'returned'. ";
 					} else {
-						message = "There was an error updating the book as received. Please try again. ";
+						requestMessage = "There was an error updating the book as received. Please try again. ";
 					}
 				} else {
-					message = "You need to login to manage requests. Please login or join or community. ";
+					requestMessage = "You need to login to manage requests. Please login or join or community. ";
 					url = "/login.jsp";
 				}
-
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// OTHER ACTIONS GO HERE
 
 		}
 
-		// set session attributes for all cases except logout
-		if (!action.equalsIgnoreCase("logout")) {
-			setSessionAttributes(session, member, message, books);
-		}
-
+		// Forward the request
 		getServletContext().getRequestDispatcher(url).forward(request, response);
 	}
 
-	private String submitRequestToBorrow(HttpServletRequest request, Member member) {
+	private boolean memberLoginGood(Member member) {
 
-		System.out.println("Inside submitRequestToBorrow");
+		member = MemberDB.checkLogin(member);
+		return member != null && member.isLoggedIn();
+	}
 
-		String message = "";
+	private String submitRequestToBorrow(HttpServletRequest request, Member requester) {
 
-		String id = request.getParameter("bookRequested");
-		System.out.println("Book ID is : " + id);
-		int idAsInt = 0;
+		String bookIdAsString = request.getParameter("bookRequested");
+		int bookId = 0;
 
-		if (member == null || !member.isLoggedIn()) {
-			message = "You are not currently logged in. ";
+		if (!memberLoginGood(requester)) {
+			return "You must login to request to borrow a book. ";
 		}
 
 		try {
-			idAsInt = Integer.parseInt(id);
+			bookId = Integer.parseInt(bookIdAsString);
 		} catch (Exception e) {
-			message = "Not a valid book id. ";
+			return "An invalid book id was submitted. ";
 		}
 
-		// TODO - verify with the book class that this is a valid book id
-		if (true) {
+		// TODO - verify with the BookDB class that this is a valid book id, and use that
+		// as the condition here, return message if not
 
-			if (!RequestDB.requestExists(idAsInt, member)) {
-				System.out.println("There is not a previous request. ");
-				int result = RequestDB.insert(idAsInt, member);
-				if (result != 0) {
-					message = "Your request has been submitted. ";
-				} else {
-					message = "There was an error submitting the request. Please try again. ";
-				}
+		if (!requester.canLendAndBorrow()) {
+			return "You cannot submit requests to borrow while in limited membership status. ";
+		}
+
+		Member owner = MemberDB.getBookOwner(bookId);
+		if (owner == null) {
+			return "Cannot find the owner of that book. No request was submitted. ";
+		}
+		if (!owner.canLendAndBorrow()) {
+			return "The owner of this book is in limited status. You cannot borrow books from members in limited membership status. ";
+		}
+
+		if (!RequestDB.requestExists(bookId, requester)) {
+			int result = RequestDB.insert(bookId, requester);
+			if (result != 0) {
+				return "Your request has been submitted. ";
 			} else {
-				message = "You have already submitted a request to borrow that book. ";
+				return "There was an error submitting the request. Please try again. ";
 			}
+		} else {
+			return "You have already submitted a request to borrow that book. ";
 		}
-
-		System.out.println("Message is : " + message);
-		return message;
 	}
 
 	private Book buildBookFromData(HttpServletRequest request, Member member) {
@@ -381,13 +385,7 @@ public class BookAppServlet extends HttpServlet {
 		return book;
 	}
 
-	private void setSessionAttributes(HttpSession session, Member member, String message, TreeSet<Book> books) {
-		session.setAttribute("message", message);
-		session.setAttribute("member", member);
-		session.setAttribute("books", books);
-	}
-
-	private Member buildMemberData(HttpServletRequest request) {
+	private Member buildMemberFromRequest(HttpServletRequest request) {
 
 		String email = request.getParameter("email");
 		String firstName = request.getParameter("firstName");

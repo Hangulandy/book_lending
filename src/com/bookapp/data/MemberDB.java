@@ -103,5 +103,85 @@ public class MemberDB {
 
 		return output;
 	}
+	
+	public static Member getMember(int memberId) {
+		
+		Member member = null;
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String query = "SELECT * FROM Member WHERE id = ?";
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setInt(1, memberId);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				int id = rs.getInt(1);
+				String firstName = rs.getString(3);
+				String lastName = rs.getString(4);
+				String userName = rs.getString(5);
+				int accountType = rs.getInt(7);
+
+				member = new Member();
+				member.setId(id);
+				member.setFirstName(firstName);
+				member.setLastName(lastName);
+				member.setUserName(userName);
+				member.setAccountType(accountType);
+				member.setLoggedIn(false);
+			}
+		} catch (SQLException e) {
+			System.out.println(e);
+		} finally {
+			DBUtil.closeResultSet(rs);
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+		return member;
+	}
+
+	public static Member getBookOwner(int bookId) {
+		
+		Member member = null;
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String query = "SELECT * FROM Book AS b JOIN Member AS m WHERE b.ownerId = m.id AND b.id = ?";
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setInt(1, bookId);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				int id = rs.getInt(9);
+				String email = rs.getString(10);
+				String firstName = rs.getString(11);
+				String lastName = rs.getString(12);
+				String userName = rs.getString(13);
+				int accountType = rs.getInt(15);
+
+				member = new Member();
+				member.setId(id);
+				member.setEmail(email);
+				member.setFirstName(firstName);
+				member.setLastName(lastName);
+				member.setUserName(userName);
+				member.setAccountType(accountType);
+				member.setLoggedIn(false);
+			}
+		} catch (SQLException e) {
+			System.out.println(e);
+		} finally {
+			DBUtil.closeResultSet(rs);
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+		return member;
+	}
 
 }

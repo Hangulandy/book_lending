@@ -1,7 +1,7 @@
 <h1>Login</h1>
 <p>Enter your login information:</p>
 <p>
-    <i class="errorMsg">${message}</i>
+    <i class="errorMsg">${loginMessage}</i>
 </p>
 
 <form action="BookAppServlet" method="post">
@@ -15,3 +15,14 @@
     <br>
     <input class="button" type="submit" value="Login" class="margin_left" />
 </form>
+
+
+<%
+	final Object lock = session.getId().intern();
+
+	synchronized (lock) {
+		session.setAttribute("loginMessage", null);
+	}
+%>
+
+<hr />

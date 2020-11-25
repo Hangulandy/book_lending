@@ -1,9 +1,11 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<p>${message}</p>
-
 <h1>Requests for Your Books:</h1>
+
+<c:if test="${requestsToMe == null || requestsToMe.size() == 0}">
+    <p>There are no requests for your books.</p>
+</c:if>
 
 <c:if test="${requestsToMe != null && requestsToMe.size() > 0}">
     <table>

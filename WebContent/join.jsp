@@ -9,7 +9,7 @@
     <i class="errorMsg">${member.errorMsg}</i>
 </p>
 <p>
-    <i class="errorMsg">${message}</i>
+    <i class="errorMsg">${joinMessage}</i>
 </p>
 
 <form action="BookAppServlet" method="post">
@@ -24,7 +24,6 @@
     <label class="pad_top">Last Name:</label>
     <input type="text" name="lastName" value="${member.lastName}" required />
     <br>
-    <hr>
 
     <label class="pad_top">Username:</label>
     <input type="text" name="userName" value="${member.userName}" required />
@@ -36,7 +35,9 @@
     <input type="password" name="pw2" required />
     <br>
     <label>&nbsp;</label>
-    <input type="submit" value="Join Now" class="margin_left" />
+    <input class="button" type="submit" value="Join Now" class="margin_left" />
 </form>
+
+<hr/>
 
 <c:import url="/resources/includes/footer.html" />

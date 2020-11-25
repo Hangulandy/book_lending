@@ -31,7 +31,7 @@ public class Member implements Serializable, Comparable<Member> {
 		this.lastName = lastName;
 		this.userName = userName;
 		this.password = password;
-		this.accountType = -1;
+		this.accountType = 3;
 		this.errorMsg = "";
 		setLoggedIn(false);
 	}
@@ -177,6 +177,10 @@ public class Member implements Serializable, Comparable<Member> {
 	@Override
 	public int compareTo(Member other) {
 		return getId().compareTo(other.getId());
+	}
+	
+	public boolean canLendAndBorrow() {
+		return accountType != 3;
 	}
 
 }

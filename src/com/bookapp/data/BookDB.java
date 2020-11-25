@@ -40,6 +40,10 @@ public class BookDB {
 	
 	public static TreeSet<Book> search(String string){
 		
+		if (string == null || string.equalsIgnoreCase("")) {
+			return null;
+		}
+		
 		TreeSet<Book> output = new TreeSet<Book>();
 		
 		ConnectionPool pool = ConnectionPool.getInstance();
@@ -61,12 +65,18 @@ public class BookDB {
 				Member owner = new Member();
 				owner.setId(rs.getInt(9));
 				owner.setEmail(rs.getString(10));
-				owner.setEmail(rs.getString(13));
+				owner.setFirstName(rs.getString(11));
+				owner.setLastName(rs.getString(12));
+				owner.setUserName(rs.getString(13));
+				owner.setAccountType(rs.getInt(15));
 				
 				Member holder = new Member();
 				holder.setId(rs.getInt(16));
 				holder.setEmail(rs.getString(17));
-				holder.setEmail(rs.getString(20));
+				owner.setFirstName(rs.getString(18));
+				owner.setLastName(rs.getString(19));
+				owner.setUserName(rs.getString(20));
+				owner.setAccountType(rs.getInt(22));
 				
 				Book book = new Book();
 

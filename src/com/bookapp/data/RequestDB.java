@@ -109,8 +109,6 @@ public class RequestDB {
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);
 		}
-
-		System.out.println("Size of requests to me tree set is : " + output.size());
 		return output;
 	}
 
@@ -159,8 +157,6 @@ public class RequestDB {
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);
 		}
-
-		System.out.println("Size of requests to others tree set is : " + output.size());
 		return output;
 	}
 
