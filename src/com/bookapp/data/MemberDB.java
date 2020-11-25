@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.bookapp.business.AccountType;
 import com.bookapp.business.Member;
 
 public class MemberDB {
@@ -64,7 +65,7 @@ public class MemberDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Member WHERE email = ? and password = ?";
+		String query = "SELECT * FROM Member AS m JOIN AccountType AS a ON m.accountType = a.id WHERE email = ? and password = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, email);
@@ -72,11 +73,15 @@ public class MemberDB {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
+				AccountType accountType = new AccountType();
+				accountType.setId(rs.getInt(8));
+				accountType.setTitle(rs.getString(9));
+				
+				
 				int id = rs.getInt(1);
 				String firstName = rs.getString(3);
 				String lastName = rs.getString(4);
 				String userName = rs.getString(5);
-				int accountType = rs.getInt(7);
 
 				member = new Member(email, firstName, lastName, userName, password);
 				member.setId(id);
@@ -103,27 +108,30 @@ public class MemberDB {
 
 		return output;
 	}
-	
+
 	public static Member getMember(int memberId) {
-		
+
 		Member member = null;
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Member WHERE id = ?";
+		String query = "SELECT * FROM Member AS m JOIN AccountType AS a ON m.accountType = a.id WHERE id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, memberId);
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
+				AccountType accountType = new AccountType();
+				accountType.setId(rs.getInt(8));
+				accountType.setTitle(rs.getString(9));
+				
 				int id = rs.getInt(1);
 				String firstName = rs.getString(3);
 				String lastName = rs.getString(4);
 				String userName = rs.getString(5);
-				int accountType = rs.getInt(7);
 
 				member = new Member();
 				member.setId(id);
@@ -144,26 +152,30 @@ public class MemberDB {
 	}
 
 	public static Member getBookOwner(int bookId) {
-		
+
 		Member member = null;
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Book AS b JOIN Member AS m WHERE b.ownerId = m.id AND b.id = ?";
+		String query = "SELECT * FROM Book AS b JOIN Member AS m JOIN AccountType AS a ON m.accountType = a.id WHERE b.ownerId = m.id AND b.id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, bookId);
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
+
+				AccountType accountType = new AccountType();
+				accountType.setId(rs.getInt(17));
+				accountType.setTitle(rs.getString(18));
+
 				int id = rs.getInt(9);
 				String email = rs.getString(10);
 				String firstName = rs.getString(11);
 				String lastName = rs.getString(12);
 				String userName = rs.getString(13);
-				int accountType = rs.getInt(15);
 
 				member = new Member();
 				member.setId(id);

@@ -40,4 +40,12 @@
 
 <hr/>
 
+<%
+    final Object lock = session.getId().intern();
+
+    synchronized (lock) {
+        session.setAttribute("joinMessage", null);
+    }
+%>
+
 <c:import url="/resources/includes/footer.html" />

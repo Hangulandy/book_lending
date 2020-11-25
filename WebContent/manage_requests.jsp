@@ -13,4 +13,12 @@
     <c:import url="/resources/includes/requests_to_others.jsp" />
 </c:if>
 
+<%
+    final Object lock = session.getId().intern();
+
+    synchronized (lock) {
+        session.setAttribute("requestMessage", null);
+    }
+%>
+
 <c:import url="/resources/includes/footer.html" />

@@ -10,4 +10,12 @@
 
 <c:import url="/resources/includes/search_results.jsp" />
 
+<%
+    final Object lock = session.getId().intern();
+
+    synchronized (lock) {
+        session.setAttribute("message", null);
+    }
+%>
+
 <c:import url="/resources/includes/footer.html" />

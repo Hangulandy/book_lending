@@ -15,7 +15,7 @@ public class Member implements Serializable, Comparable<Member> {
 	private String lastName;
 	private String userName;
 	private String password;
-	private int accountType;
+	private AccountType accountType;
 	private String errorMsg;
 	private boolean loggedIn;
 	public final static int MAX_NAME_LEN = 40;
@@ -31,7 +31,7 @@ public class Member implements Serializable, Comparable<Member> {
 		this.lastName = lastName;
 		this.userName = userName;
 		this.password = password;
-		this.accountType = 3;
+		this.accountType = new AccountType();
 		this.errorMsg = "";
 		setLoggedIn(false);
 	}
@@ -106,14 +106,15 @@ public class Member implements Serializable, Comparable<Member> {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public int getAccountType() {
+	
+	public AccountType getAccountType() {
 		return accountType;
 	}
 
-	public void setAccountType(int accountType) {
+	public void setAccountType(AccountType accountType) {
 		this.accountType = accountType;
 	}
+	
 
 	public String getErrorMsg() {
 		setErrorMsg();
@@ -180,7 +181,7 @@ public class Member implements Serializable, Comparable<Member> {
 	}
 	
 	public boolean canLendAndBorrow() {
-		return accountType != 3;
+		return !accountType.isLimited();
 	}
 
 }
