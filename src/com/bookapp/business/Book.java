@@ -1,17 +1,21 @@
 package com.bookapp.business;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
+import java.io.Serializable;
+import java.util.Set;
 
-public class Book implements Comparable<Book> {
+public class Book implements Serializable, Comparable<Book> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String title;
 	private String author;
 	private int pages;
 	private int recommendedAge;
-	private int ownerId;
-	private int holderId;
+	private Member owner;
+	private Member holder;
 	private boolean lendable;
 	private String errorMsg;
 
@@ -20,8 +24,8 @@ public class Book implements Comparable<Book> {
 		author = "";
 		pages = 0;
 		recommendedAge = 0;
-		ownerId = 0;
-		holderId = 0;
+		setOwner(null);
+		setHolder(null);
 		lendable = false;
 	}
 
@@ -61,6 +65,10 @@ public class Book implements Comparable<Book> {
 		this.pages = myParseInt(pages, 10);
 	}
 
+	public void setPages(int pages) {
+		this.pages = mySetInt(pages, 10);
+	}
+
 	//FIXME: This is producing strange output?
 	public int getRecommendedAge() {
 		if (recommendedAge == 0) {
@@ -72,21 +80,27 @@ public class Book implements Comparable<Book> {
 	public void setRecommendedAge(String recommendedAge) {
 		this.recommendedAge = myParseInt(recommendedAge, 10);
 	}
-
-	public int getOwnerId() {
-		return ownerId;
+	
+	public void setRecommendedAge(int recommendedAge) {
+		this.recommendedAge = mySetInt(recommendedAge, 10);
 	}
 
-	public void setOwnerId(int ownerId) {
-		this.ownerId = ownerId;
+
+
+	public Member getOwner() {
+		return owner;
 	}
 
-	public int getHolderId() {
-		return holderId;
+	public void setOwner(Member owner) {
+		this.owner = owner;
 	}
 
-	public void setHolderId(int holderId) {
-		this.holderId = holderId;
+	public Member getHolder() {
+		return holder;
+	}
+
+	public void setHolder(Member holder) {
+		this.holder = holder;
 	}
 
 	public boolean isLendable() {
@@ -108,6 +122,10 @@ public class Book implements Comparable<Book> {
 		return output;
 	}
 
+	private int mySetInt(int num, int def) {
+		return num > 0 ? num : def;
+	}
+
 	public String getErrorMsg() {
 		setErrorMsg();
 		return errorMsg;
@@ -124,11 +142,25 @@ public class Book implements Comparable<Book> {
 		if (getAuthor().trim().length() == 0) {
 			sb.append("Author must be at least one character in length. If unknown, use 'UNK' or 'Unknown'");
 		}
-		
-		if (ownerId == 0 || holderId == 0) {
+
+		if (owner.getId() == 0 || holder.getId() == 0) {
 			sb.append("Could not find login credentials. Try to log in again before adding a book. ");
 		}
 		errorMsg = sb.toString();
+	}
+
+	@Override
+	public int compareTo(Book other) {
+
+		if (!this.getTitle().equalsIgnoreCase(other.getTitle())) {
+			return this.getTitle().compareToIgnoreCase(other.getTitle());
+		}
+
+		if (!this.getAuthor().equalsIgnoreCase(other.getAuthor())) {
+			return this.getAuthor().compareToIgnoreCase(other.getAuthor());
+		}
+
+		return getOwner().compareTo(other.getOwner());
 	}
 	
 	//This is mostly for testing and debugging
@@ -154,6 +186,18 @@ public class Book implements Comparable<Book> {
 				.append(this.author, otherBook.getAuthor())
 				.append(this.ownerId, otherBook.getOwnerId())
 				.toComparison();
+	}
+	public boolean isInRequestSet(Set<Request> set) {
+		
+		if (set != null) {
+			for (Request request : set) {
+				if (this.getId() == request.getBook().getId() && request.isOpen()) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	

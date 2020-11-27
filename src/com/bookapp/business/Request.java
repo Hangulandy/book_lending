@@ -1,24 +1,31 @@
 package com.bookapp.business;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Request {
-	
-	// TODO - This class has no functionality yet, i.e. no business rules.
+public class Request implements Serializable, Comparable<Request> {
 
-	private int id;
-	private int ownerId;
-	private int requesterId;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Integer id;
+	private Book book;
+	private Member requester;
 	private Date dateRequested;
-	private boolean approved;
-	private Date dateApprovedSelected;
-	private Date dateSentByOwner;
+	private Date dateAnswered;
 	private Date dateReceivedByRequester;
-	private Date dateSentByRequester;
-	private Date dateReceivedByOwner;
+	private Date dateClosedByOwner;
 	private String remarks;
+	private Integer stage; 
+	
+	// Stages:
+	// Stage 1 = request submitted, pending approval;
+	// Stage 2 = request approved
+	// Stage 3 = Book lent to requester
+	// Stage 4 = closed out (either denied or book received by owner)
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -26,20 +33,20 @@ public class Request {
 		this.id = id;
 	}
 
-	public int getOwnerId() {
-		return ownerId;
+	public Book getBook() {
+		return book;
 	}
 
-	public void setOwnerId(int ownerId) {
-		this.ownerId = ownerId;
+	public void setBook(Book book) {
+		this.book = book;
 	}
 
-	public int getRequesterId() {
-		return requesterId;
+	public Member getRequester() {
+		return requester;
 	}
 
-	public void setRequesterId(int requesterId) {
-		this.requesterId = requesterId;
+	public void setRequester(Member requester) {
+		this.requester = requester;
 	}
 
 	public Date getDateRequested() {
@@ -50,28 +57,16 @@ public class Request {
 		this.dateRequested = dateRequested;
 	}
 
-	public boolean isApproved() {
-		return approved;
+	
+
+
+
+	public Date getDateAnswered() {
+		return dateAnswered;
 	}
 
-	public void setApproved(boolean approved) {
-		this.approved = approved;
-	}
-
-	public Date getDateApprovedSelected() {
-		return dateApprovedSelected;
-	}
-
-	public void setDateApprovedSelected(Date dateApprovedSelected) {
-		this.dateApprovedSelected = dateApprovedSelected;
-	}
-
-	public Date getDateSentByOwner() {
-		return dateSentByOwner;
-	}
-
-	public void setDateSentByOwner(Date dateSentByOwner) {
-		this.dateSentByOwner = dateSentByOwner;
+	public void setDateAnswered(Date dateAnswered) {
+		this.dateAnswered = dateAnswered;
 	}
 
 	public Date getDateReceivedByRequester() {
@@ -82,20 +77,14 @@ public class Request {
 		this.dateReceivedByRequester = dateReceivedByRequester;
 	}
 
-	public Date getDateSentByRequester() {
-		return dateSentByRequester;
+
+
+	public Date getDateClosedByOwner() {
+		return dateClosedByOwner;
 	}
 
-	public void setDateSentByRequester(Date dateSentByRequester) {
-		this.dateSentByRequester = dateSentByRequester;
-	}
-
-	public Date getDateReceivedByOwner() {
-		return dateReceivedByOwner;
-	}
-
-	public void setDateReceivedByOwner(Date dateReceivedByOwner) {
-		this.dateReceivedByOwner = dateReceivedByOwner;
+	public void setDateClosedByOwner(Date dateClosedByOwner) {
+		this.dateClosedByOwner = dateClosedByOwner;
 	}
 
 	public String getRemarks() {
@@ -106,7 +95,51 @@ public class Request {
 		this.remarks = remarks;
 	}
 
-	// TODO - somehow there need to be remarks that can be entered. Should this be
-	// another table?
+	public Integer getStage() {
+		
+		if (getDateClosedByOwner() != null) {
+			setStage(4);
+			return stage;
+		}
+		
+		if (getDateReceivedByRequester() != null) {
+			setStage(3);
+			return stage;
+		}
+		
+		if (getDateAnswered() != null) {
+			setStage(2);
+			return stage;
+		}
+		
+		setStage(1);
+		return stage;
+	}
+
+	public void setStage(int stage) {
+		this.stage = new Integer(stage);
+	}
+
+	@Override
+	public int compareTo(Request other) {
+			
+		if (!getStage().equals(other.getStage())) {
+			return getStage().compareTo(other.getStage());
+		}
+		
+		if (!getDateRequested().equals(other.getDateRequested())) {
+			return getDateRequested().compareTo(other.dateRequested);
+		}
+		
+		if (!getBook().getTitle().equals(other.getBook().getTitle())) {
+			return getBook().getTitle().compareTo(other.getBook().getTitle());
+		}
+		
+		return getId().compareTo(other.getId());
+	}
+
+	public boolean isOpen() {
+		return stage != 4;
+	}
 
 }

@@ -2,19 +2,22 @@
 
 <c:import url="/resources/includes/header.jsp" />
 
+<p>${requestMessage}</p>
+
 <c:if test="${member.isLoggedIn() == false || member == null}">
     <c:import url="/resources/includes/login.jsp" />
 </c:if>
 
-<p>${message}</p>
-
-<c:import url="/resources/includes/search_results.jsp" />
+<c:if test="${member.isLoggedIn() == true}">
+    <c:import url="/resources/includes/requests_to_me.jsp" />
+    <c:import url="/resources/includes/requests_to_others.jsp" />
+</c:if>
 
 <%
     final Object lock = session.getId().intern();
 
     synchronized (lock) {
-        session.setAttribute("message", null);
+        session.setAttribute("requestMessage", null);
     }
 %>
 
