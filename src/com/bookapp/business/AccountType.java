@@ -15,7 +15,25 @@ public class AccountType implements Serializable {
 		id = 3;
 		title = "limited";
 	}
-
+	
+	public AccountType(int type) {
+		id = type;
+		switch(id) {
+		case 1:
+			title = "member";
+			break;
+		case 2:
+			title = "admin";
+			break;
+		case 3:
+			title = "limited";
+			break;
+		default:
+			title = "limited";
+			id = 3;			
+		}
+	}
+	
 	public int getId() {
 		return id;
 	}

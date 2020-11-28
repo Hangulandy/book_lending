@@ -14,7 +14,9 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import com.bookapp.business.AccountType;
 import com.bookapp.business.Book;
 import com.bookapp.business.Member;
 import com.bookapp.business.Request;
@@ -391,6 +393,67 @@ public class BookAppServlet extends HttpServlet {
 
 			}
 			
+			// Edit Member
+			if (action.equalsIgnoreCase("editMember")) {
+				System.out.println("EDIT MEMBER");
+				member = MemberDB.checkLogin(member);
+				if (member != null && member.isLoggedIn() 
+						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) 
+				{
+					int memberIdToEdit = Integer.parseInt(request.getParameter("memberIdToEdit"));
+					Member memberToEdit = MemberDB.getMember(memberIdToEdit);
+
+					if (memberToEdit != null) {
+						url = "/editMember.jsp";
+
+						//No need to keep this in the session
+						request.setAttribute("memberToEdit", memberToEdit);
+						url = "/editMember.jsp";
+					} else {
+						url = "/admin.jsp";
+						request.setAttribute("message", "Unable to edit member");
+						
+					}
+				}
+			}
+			
+			// ACTION: Update Member
+			if (action.equalsIgnoreCase("updateMember")) {
+				System.out.println("UPDATING MEMBER");
+				int memberId = Integer.parseInt(request.getParameter("memberId"));
+				if (member != null && member.isLoggedIn()
+						&& member.getAccountType().getTitle().equalsIgnoreCase("admin"))
+				{
+					Member oldMember = MemberDB.getMember(memberId);
+
+					if (oldMember != null) {
+						Member updatedMember = buildMemberFromRequest(request);
+						updatedMember.setId(memberId);
+						updatedMember.setLoggedIn(oldMember.isLoggedIn());
+						
+						// Check if password changed 
+						String password = request.getParameter("password");
+						if(StringUtils.isNotBlank(password)) {
+							updatedMember.setPassword(password);
+						} else {
+							updatedMember.setPassword(oldMember.getPassword());
+						}
+						
+						// get account type and set
+						updatedMember
+							.setAccountType(new AccountType(
+									Integer.parseInt(request.getParameter("accountType"))));
+
+						int updated = MemberDB.update(updatedMember);
+						if (updated == 1) {
+							request.setAttribute("message", "Updated member!");
+						} else {
+							request.setAttribute("message", "Unable to update member!"); 
+						}
+					}
+				}
+				url = "/admin.jsp";
+			}
 			// OTHER ACTIONS GO HERE
 
 		}
@@ -491,8 +554,13 @@ public class BookAppServlet extends HttpServlet {
 	}
 
 	private boolean pwSame(HttpServletRequest request) {
-
-		return request.getParameter("pw1").equalsIgnoreCase(request.getParameter("pw2"));
+		String pw1 = request.getParameter("pw1");
+		String pw2 = request.getParameter("pw2");
+		if (StringUtils.isNotBlank(pw1) && StringUtils.isNotBlank(pw2)) {
+			return pw1.equalsIgnoreCase(pw2);
+		} else {
+			return false;
+		}
 	}
 
 	/**

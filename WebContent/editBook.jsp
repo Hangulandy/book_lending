@@ -2,8 +2,6 @@
 
 <c:import url="/resources/includes/header.jsp" />
 
-<jsp:useBean id="bookHelper" scope="request" class="com.bookapp.business.BookHelperBean"/>
-
 <c:if test="${member.isLoggedIn() == false || member == null}">
     <c:import url="/resources/includes/cannot_view.jsp" />
 </c:if>
@@ -13,9 +11,8 @@
 </p>
 
 <c:if test="${member.isLoggedIn() == true}">
-<p>Logged In as ${member.userName} -- #${member.id}</p>
     <h1>Edit book:</h1>
-    <form action="BookAppServlet" method="post">
+    <form class="sideBySide" action="BookAppServlet" method="post">
         <input type="hidden" name="action" value="updateBook"/>
         <input type="hidden" name="bookId" value="${bookToEdit.id}"/>
 		
@@ -38,7 +35,9 @@
         </select>
         <hr>
         <label>&nbsp;</label>
-	    <input type="submit" value="Edit" class="margin_left" />
+	    <input class="button" type="submit" value="Edit" class="margin_left" />
     </form>
-        <a href="manage_books.jsp">Go Back</a>
+        <form class="sideBySide" action="manage_books.jsp" method="post">
+			<input class="button" type="submit" value="Go Back" />
+		</form>
 </c:if>

@@ -11,7 +11,7 @@
     <input type="email" name="email" value="${member.email}" required />
     <br>
     <label class="pad_top">Password:</label>
-    <input type="password" name="password" required />
+    <input type="password" name="password" required min=5 max=20 />
     <br>
     <input class="button" type="submit" value="Login" class="margin_left" />
 </form>
