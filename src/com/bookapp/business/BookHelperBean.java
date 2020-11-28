@@ -20,10 +20,8 @@ public class BookHelperBean {
 
 	public TreeSet<Book> getAllBooks() {
 		TreeSet<Book> allBooks = BookDB.getAllBooks();
-		System.out.println("getAllBooks -- " + ArrayUtils.toString(allBooks));
 		return allBooks;
 		
-//		return BookDB.getAllBooks();
 	}
 	
 }
