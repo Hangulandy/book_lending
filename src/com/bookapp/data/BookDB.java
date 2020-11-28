@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.TreeSet;
 
 import com.bookapp.business.AccountType;
-import org.apache.commons.lang3.BooleanUtils;
 
 import com.bookapp.business.Book;
 import com.bookapp.business.Member;
@@ -128,12 +127,14 @@ public class BookDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
-		String query = "SELECT * FROM Book WHERE TITLE = ? AND ownerId = ?";
+		String query = "SELECT * FROM Book AS b "
+						+ "JOIN Member AS o ON b.ownerId = o.id "
+						+ "WHERE b.ownerId = ? AND TITLE = ?";
 		
 		try {
 			ps = connection.prepareStatement(query);
-			ps.setString(1, book.getTitle());
-			ps.setInt(2, book.getOwnerId());
+			ps.setInt(1, book.getOwner().getId());
+			ps.setString(2, book.getTitle());
 			rs = ps.executeQuery();
 			return rs.next();
 			
@@ -188,18 +189,23 @@ public class BookDB {
 	 * @param id
 	 * @return
 	 */
-	public static Book selectBookById(int id) {
+	public static Book selectBookById(int bookId) {
 ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
-		//TODO This needs exact match? regex?
-		String query = "SELECT * FROM Book WHERE ID = ?";
+		String query = "SELECT * FROM Book AS b "
+				+ "JOIN Member AS o ON b.ownerId = o.id "
+				+ "JOIN AccountType AS oa ON o.accountType = oa.id "
+				+ "JOIN Member AS h ON b.holderId = h.id "
+				+ "JOIN AccountType AS ha ON h.accountType = ha.id "
+				+ "WHERE b.id = ?";
+
 		
 try {
 			ps = connection.prepareStatement(query);
-			ps.setInt(1, id);
+			ps.setInt(1, bookId);
 			rs = ps.executeQuery();
 			
 			Book book = null;
@@ -243,8 +249,8 @@ try {
 			ps.setString(2, book.getAuthor());
 			ps.setInt(3, book.getPages());
 			ps.setInt(4, book.getRecommendedAge());
-			ps.setInt(5, book.getOwnerId());
-			ps.setInt(6, book.getHolderId());
+			ps.setInt(5, book.getOwner().getId());
+			ps.setInt(6, book.getHolder().getId());
 			ps.setBoolean(7, book.isLendable());
 			ps.setInt(8, book.getId());
 			return ps.executeUpdate();
@@ -291,8 +297,12 @@ try {
 		
 		TreeSet<Book> allBooks = new TreeSet<>(); 
 		
-		String query = "SELECT * FROM Book";
-		
+		String query = "SELECT * FROM Book AS b "
+				+ "JOIN Member AS o ON b.ownerId = o.id "
+				+ "JOIN AccountType AS oa ON o.accountType = oa.id "
+				+ "JOIN Member AS h ON b.holderId = h.id "
+				+ "JOIN AccountType AS ha ON h.accountType = ha.id ";
+
 		try {
 			ps = connection.prepareStatement(query);
 			rs = ps.executeQuery();
@@ -323,9 +333,15 @@ try {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
-		TreeSet<Book> allBooks = new TreeSet<>(); 
+		TreeSet<Book> memberBooks = new TreeSet<>(); 
 		
-		String query = "SELECT * FROM Book WHERE ownerId = ?";
+		String query = "SELECT * FROM Book AS b "
+				+ "JOIN Member AS o ON b.ownerId = o.id "
+				+ "JOIN AccountType AS oa ON o.accountType = oa.id "
+				+ "JOIN Member AS h ON b.holderId = h.id "
+				+ "JOIN AccountType AS ha ON h.accountType = ha.id "
+				+ "WHERE b.ownerId = ?";
+
 		
 		try {
 			ps = connection.prepareStatement(query);
@@ -333,19 +349,19 @@ try {
 			rs = ps.executeQuery();
 			
 			while (rs.next()) {
-				System.out.println(rs.getString("title"));
-				allBooks.add(resultToBook(rs));
+				memberBooks.add(resultToBook(rs));
 			}
-			return allBooks;
 			
 		} catch (SQLException e) {
 			System.out.println(e);
-			return allBooks;
+			return memberBooks;
 		} finally {
 			DBUtil.closeResultSet(rs);
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);
 		}
+		
+		return memberBooks;
 	}
 	
 	/**
@@ -357,15 +373,38 @@ try {
 		Book book = new Book();
 		
 		try {
-			book.setId(rs.getInt("id"));
-			book.setTitle(rs.getString("title"));
-			book.setAuthor(rs.getString("author"));
-			//FIXME  string or int?
-			book.setPages(Integer.toString(rs.getInt("pages")));
-			book.setRecommendedAge(Integer.toString(rs.getInt("recommendedAge")));
-			book.setOwnerId(rs.getInt("ownerId"));
-			book.setHolderId(rs.getInt("holderId"));
-			book.setLendable(BooleanUtils.toBoolean(rs.getInt("lendable")));
+			AccountType ownerAT = new AccountType();
+			ownerAT.setId(rs.getInt(16));
+			ownerAT.setTitle(rs.getString(17));
+
+			Member owner = new Member();
+			owner.setId(rs.getInt(9));
+			owner.setEmail(rs.getString(10));
+			owner.setFirstName(rs.getString(11));
+			owner.setLastName(rs.getString(12));
+			owner.setUserName(rs.getString(13));
+			owner.setAccountType(ownerAT);
+
+			AccountType holderAT = new AccountType();
+			holderAT.setId(rs.getInt(24));
+			holderAT.setTitle(rs.getString(25));
+
+			Member holder = new Member();
+			holder.setId(rs.getInt(18));
+			holder.setEmail(rs.getString(19));
+			owner.setFirstName(rs.getString(20));
+			owner.setLastName(rs.getString(21));
+			owner.setUserName(rs.getString(22));
+			owner.setAccountType(holderAT);
+
+			book.setId(rs.getInt(1));
+			book.setTitle(rs.getString(2));
+			book.setAuthor(rs.getString(3));
+			book.setPages(rs.getInt(4));
+			book.setRecommendedAge(rs.getInt(5));
+			book.setOwner(owner);
+			book.setHolder(holder);
+			book.setLendable(rs.getBoolean(8));
 		} catch (SQLException e) {
 			System.out.println(e);
 		}

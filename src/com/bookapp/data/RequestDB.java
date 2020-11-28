@@ -63,7 +63,29 @@ public class RequestDB {
 			pool.freeConnection(connection);
 		}
 	}
-
+	
+	public static int delete(Request request) {
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		
+		String query = "DELETE FROM Request "
+				+ "WHERE id = ?";
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setInt(1, request.getId());
+			return ps.executeUpdate();
+			
+		} catch (SQLException e) {
+			System.out.println(e);
+			return 0;
+		} finally {
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+	}
+		
+	
 	public static TreeSet<Request> getRequestsToMe(int ownerId) {
 
 		TreeSet<Request> output = new TreeSet<Request>();

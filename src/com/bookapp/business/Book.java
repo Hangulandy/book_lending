@@ -3,6 +3,9 @@ package com.bookapp.business;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 public class Book implements Serializable, Comparable<Book> {
 
 	/**
@@ -69,7 +72,6 @@ public class Book implements Serializable, Comparable<Book> {
 		this.pages = mySetInt(pages, 10);
 	}
 
-	//FIXME: This is producing strange output?
 	public int getRecommendedAge() {
 		if (recommendedAge == 0) {
 			recommendedAge = 10;
@@ -149,20 +151,6 @@ public class Book implements Serializable, Comparable<Book> {
 		errorMsg = sb.toString();
 	}
 
-	@Override
-	public int compareTo(Book other) {
-
-		if (!this.getTitle().equalsIgnoreCase(other.getTitle())) {
-			return this.getTitle().compareToIgnoreCase(other.getTitle());
-		}
-
-		if (!this.getAuthor().equalsIgnoreCase(other.getAuthor())) {
-			return this.getAuthor().compareToIgnoreCase(other.getAuthor());
-		}
-
-		return getOwner().compareTo(other.getOwner());
-	}
-	
 	//This is mostly for testing and debugging
 	@Override
 	public String toString() {
@@ -173,8 +161,8 @@ public class Book implements Serializable, Comparable<Book> {
 				getAuthor() + delim + 
 			    getPages() + delim + 
 				getRecommendedAge() + delim +
-			    getOwnerId() + delim + 
-				getHolderId() + delim + 
+			    getOwner().getId() + delim + 
+				getHolder().getId() + delim + 
 			    isLendable()
 				);
 	}
@@ -184,7 +172,7 @@ public class Book implements Serializable, Comparable<Book> {
 		return new CompareToBuilder()
 				.append(this.title, otherBook.getTitle())
 				.append(this.author, otherBook.getAuthor())
-				.append(this.ownerId, otherBook.getOwnerId())
+				.append(this.getOwner().getId(), otherBook.getOwner().getId())
 				.toComparison();
 	}
 	public boolean isInRequestSet(Set<Request> set) {
@@ -211,7 +199,7 @@ public class Book implements Serializable, Comparable<Book> {
 		return new EqualsBuilder()
 			.append(this.title, otherBook.getTitle())
 			.append(this.author, otherBook.getAuthor())
-			.append(this.ownerId, otherBook.getOwnerId())
+			.append(this.getOwner().getId(), otherBook.getOwner().getId())
 			.isEquals();
 	}
 

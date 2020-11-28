@@ -43,7 +43,6 @@
 			<th>Author</th>
 			<th>Pages</th>
 			<th>Recommended Age</th>
-			<th>Owner Id</th>
 			<th>Holder Id</th>
 			<th>Lendable</th>
 		</tr>
@@ -56,8 +55,7 @@
 			<td>${book.author}</td>
 			<td>${book.pages}</td>
 			<td>${book.recommendedAge}</td>
-			<td>${book.ownerId}</td>
-			<td>${book.holderId}</td>
+			<td>${book.holder.id}</td>
 			<td>${book.lendable}</td>
 			<td> 
 				<form action="BookAppServlet">
@@ -70,19 +68,13 @@
 				<form action="BookAppServlet">
 					<input type="hidden" name="action" value="deleteBook"/>
 					<input type="hidden" name="bookId" value="${book.id}"/>
-					<input type="submit" value="Delete" ${book.ownerId != book.holderId ? 'disabled' : '' }/>
+					<input type="submit" value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
 				</form>
 			</td>
 		</tr>
 	</c:forEach>	
 	</tbody>
 </table>
-
-
-<H1>!!Debug!! All Books</H1>
-<c:forEach items="${bookHelper.getAllBooks()}" var="book">
-	<p>${book}</p>
-</c:forEach>
 
 <c:import url="/resources/includes/options.jsp" />
 

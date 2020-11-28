@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<c:import url="/resources/includes/header.html" />
+<c:import url="/resources/includes/header.jsp" />
 
 <jsp:useBean id="bookHelper" scope="request" class="com.bookapp.business.BookHelperBean"/>
 
@@ -32,9 +32,9 @@
         <input type="number" name="recommendedAge" value="${bookToEdit.recommendedAge}" min="1">
         <br>
         <label class="pad_top">Lendable</label>
-        <select ${bookToEdit.ownerId != bookToEdit.holderId ? 'disabled' : '' }>
-        	<option>Yes</option>
-        	<option>No</option>
+        <select name="lendable" ${bookToEdit.owner.id != bookToEdit.holder.id ? 'disabled' : '' }>
+        	<option ${bookToEdit.isLendable() ? 'selected' : ''} value="1">Yes</option>
+        	<option ${!bookToEdit.isLendable() ? 'selected' : ''} value="0">No</option>
         </select>
         <hr>
         <label>&nbsp;</label>

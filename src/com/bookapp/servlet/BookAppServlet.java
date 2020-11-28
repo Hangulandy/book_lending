@@ -1,7 +1,9 @@
 package com.bookapp.servlet;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,8 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
+
 import com.bookapp.business.Book;
 import com.bookapp.business.Member;
+import com.bookapp.business.Request;
 import com.bookapp.data.BookDB;
 import com.bookapp.data.MemberDB;
 import com.bookapp.data.RequestDB;
@@ -326,7 +332,7 @@ public class BookAppServlet extends HttpServlet {
 					Book bookToEdit = BookDB.selectBookById(bookIdToEdit);
 					
 					//Check that the book exists and person editing the book is the owner
-					if (bookToEdit != null && bookToEdit.getOwnerId() == member.getId()) {
+					if (bookToEdit != null && bookToEdit.getOwner().getId() == member.getId()) {
 						url = "/editBook.jsp";
 						
 						//No need to keep this in the session
@@ -345,14 +351,11 @@ public class BookAppServlet extends HttpServlet {
 				if (member != null && member.isLoggedIn()) {
 					Book oldBook = BookDB.selectBookById(bookId);
 
-					if (oldBook != null && oldBook.getOwnerId() == member.getId()) {
+					if (oldBook != null && oldBook.getOwner().getId() == member.getId()) {
 						Book updatedBook = buildBookFromData(request, member);
 						// Get values from book before updating
 						updatedBook.setId(bookId);
-						updatedBook.setHolderId(oldBook.getHolderId());
-						updatedBook.setLendable(oldBook.isLendable());
-
-						System.out.println("UPDATING BOOK --> " + updatedBook.toString());
+						updatedBook.setHolder(oldBook.getHolder());
 
 						int updated = BookDB.update(updatedBook);
 					}
@@ -370,9 +373,17 @@ public class BookAppServlet extends HttpServlet {
 				if (member != null && member.isLoggedIn()) {
 					Book bookToDelete = BookDB.selectBookById(bookId);
 
-					if (bookToDelete != null && bookToDelete.getOwnerId() == member.getId()) {
-						int deleted = BookDB.delete(bookToDelete);
-						System.out.println("Deleted Book " + deleted);
+					if (bookToDelete != null && bookToDelete.getOwner().getId() == member.getId() &&
+							bookToDelete.getHolder().getId() == member.getId()) {
+						
+						// Get requests for deleted book and deny
+						TreeSet<Request> bookRequests = RequestDB.getRequestsToMe(member.getId());
+						bookRequests.stream()
+							.filter(req -> req.getBook().getId() == bookId)
+							.forEach(RequestDB::delete);
+
+						BookDB.delete(bookToDelete);
+						
 					}
 				}
 				//TODO add some error message if ifs are false
@@ -445,7 +456,8 @@ public class BookAppServlet extends HttpServlet {
 			String author = request.getParameter("author");
 			String pages = request.getParameter("pages");
 			String recommendedAge = request.getParameter("recommendedAge");
-
+			String isLendable = request.getParameter("lendable");
+			
 			if (title != null && author != null) {
 				book = new Book();
 				book.setTitle(title);
@@ -454,7 +466,8 @@ public class BookAppServlet extends HttpServlet {
 				book.setRecommendedAge(recommendedAge);
 				book.setOwner(member);
 				book.setHolder(member);
-				book.setLendable(false);
+				//If isLendable param not in request then default to true
+				book.setLendable(isLendable != null ? BooleanUtils.toBoolean(isLendable) : true);
 			}
 		}
 		return book;
