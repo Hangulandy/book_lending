@@ -3,19 +3,19 @@ package com.bookapp.business;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
-public class Member implements Serializable {
+public class Member implements Serializable, Comparable<Member> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int id;
+	private Integer id;
 	private String email;
 	private String firstName;
 	private String lastName;
 	private String userName;
 	private String password;
-	private int accountType;
+	private AccountType accountType;
 	private String errorMsg;
 	private boolean loggedIn;
 	public final static int MAX_NAME_LEN = 40;
@@ -31,12 +31,12 @@ public class Member implements Serializable {
 		this.lastName = lastName;
 		this.userName = userName;
 		this.password = password;
-		this.accountType = -1;
+		this.accountType = new AccountType();
 		this.errorMsg = "";
 		setLoggedIn(false);
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
@@ -106,14 +106,15 @@ public class Member implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public int getAccountType() {
+	
+	public AccountType getAccountType() {
 		return accountType;
 	}
 
-	public void setAccountType(int accountType) {
+	public void setAccountType(AccountType accountType) {
 		this.accountType = accountType;
 	}
+	
 
 	public String getErrorMsg() {
 		setErrorMsg();
@@ -172,6 +173,15 @@ public class Member implements Serializable {
 
 	public String toString() {
 		return String.format("Member %s %s with username %s", getFirstName(), getLastName(), getUserName());
+	}
+
+	@Override
+	public int compareTo(Member other) {
+		return getId().compareTo(other.getId());
+	}
+	
+	public boolean canLendAndBorrow() {
+		return !accountType.isLimited();
 	}
 
 }
