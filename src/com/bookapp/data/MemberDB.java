@@ -181,7 +181,7 @@ public class MemberDB {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "SELECT * FROM Book AS b JOIN Member AS o ON b.ownerId = o.id JOIN AccountType AS a ON o.accountType = a.id WHERE b.id = ?";
+		String query = "SELECT * FROM Book AS b JOIN Member AS m ON b.ownerId = m.id JOIN AccountType AS a ON m.accountType = a.id WHERE b.id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, bookId);

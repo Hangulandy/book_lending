@@ -250,6 +250,7 @@ public class BookAppServlet extends HttpServlet {
 				session.setAttribute("requestMessage", requestMessage);
 			}
 
+			//FIXME: Need to change holder id on book
 			// ACTION: Receive book (as requester)
 			if (action.equalsIgnoreCase("receive")) {
 
@@ -300,6 +301,7 @@ public class BookAppServlet extends HttpServlet {
 				session.setAttribute("requestMessage", requestMessage);
 			}
 
+			//FIXME: Need to change holder id on book
 			// ACTION: Return Book to Owner
 			if (action.equalsIgnoreCase("returnBook")) {
 
@@ -340,7 +342,7 @@ public class BookAppServlet extends HttpServlet {
 						//No need to keep this in the session
 						request.setAttribute("bookToEdit", bookToEdit);
 					} else {
-						//TODO ERROR MESSAGE
+						request.setAttribute("message", "Unable to edit book");
 					}
 					
 				}
@@ -362,8 +364,7 @@ public class BookAppServlet extends HttpServlet {
 						int updated = BookDB.update(updatedBook);
 					}
 				}
-				//TODO add some error message if ifs are false
-				
+				request.setAttribute("message", "Unable to update book");
 				url = "/manage_books.jsp";
 			}
 			
@@ -388,7 +389,7 @@ public class BookAppServlet extends HttpServlet {
 						
 					}
 				}
-				//TODO add some error message if ifs are false
+				request.setAttribute("message", "Unable to delete book");
 				url = "/manage_books.jsp";
 
 			}
