@@ -108,6 +108,7 @@ public class RequestDB {
 				requester.setEmail(rs.getString(18));
 				requester.setUserName(rs.getString(21));
 
+				//FIXME: Not getting whole book object
 				Book book = new Book();
 				book.setId(rs.getInt(9));
 				book.setTitle(rs.getString(10));
