@@ -76,6 +76,39 @@
 	</tbody>
 </table>
 
+<H1>Borrowed Books</H1>
+<table>
+	<thead>
+		<tr>
+			<th>Book Id</th>
+			<th>Title</th>
+			<th>Author</th>
+			<th>Pages</th>
+			<th>Recommended Age</th>
+			<th>Owner</th>
+		</tr>
+	</thead>
+	<tbody>
+	<c:forEach items="${bookHelper.getBorrowedBooks(member.id)}" var="book">
+		<tr>
+			<td>${book.id}</td>
+			<td>${book.title}</td>
+			<td>${book.author}</td>
+			<td>${book.pages}</td>
+			<td>${book.recommendedAge}</td>
+			<td>${book.owner.userName}</td>
+			<td> 
+				<form action="BookAppServlet">
+					<input type="hidden" name="action" value="returnBook"/>
+					<input type="hidden" name="bookId" value="${book.id}"/>
+					<input type="submit" value="Return Book"/>
+				</form>
+			</td>
+		</tr>
+	</c:forEach>	
+	</tbody>
+</table>
+
 <c:import url="/resources/includes/options.jsp" />
 
 <c:import url="/resources/includes/footer.html" />

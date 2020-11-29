@@ -21,7 +21,9 @@ public class BookHelperBean {
 	public TreeSet<Book> getAllBooks() {
 		TreeSet<Book> allBooks = BookDB.getAllBooks();
 		return allBooks;
-		
 	}
 	
+	public TreeSet<Book> getBorrowedBooks(int memberId) {
+		return BookDB.getBorrowedBooks(memberId);
+	}	
 }

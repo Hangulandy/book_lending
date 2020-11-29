@@ -329,6 +329,44 @@ try {
 		return memberBooks;
 	}
 	
+	public static TreeSet<Book> getBorrowedBooks(int memberId) {
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		TreeSet<Book> holderBooks = new TreeSet<>(); 
+		
+		String query = "SELECT * FROM Book AS b "
+				+ "JOIN Member AS o ON b.ownerId = o.id "
+				+ "JOIN AccountType AS oa ON o.accountType = oa.id "
+				+ "JOIN Member AS h ON b.holderId = h.id "
+				+ "JOIN AccountType AS ha ON h.accountType = ha.id "
+				+ "WHERE b.holderId = ? AND b.ownerId != ?";
+
+		
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setInt(1, memberId);
+			ps.setInt(2, memberId);
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				holderBooks.add(resultToBook(rs));
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e);
+			return holderBooks;
+		} finally {
+			DBUtil.closeResultSet(rs);
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+		
+		return holderBooks;
+	}
+	
 	/**
 	 * Helper method to turn resultSet to Book Object
 	 * @param rs
