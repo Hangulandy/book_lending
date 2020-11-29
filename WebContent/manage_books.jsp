@@ -38,12 +38,12 @@
 <table>
 	<thead>
 		<tr>
-			<th>Id</th>
+			<th>Book Id</th>
 			<th>Title</th>
 			<th>Author</th>
 			<th>Pages</th>
 			<th>Recommended Age</th>
-			<th>Holder Id</th>
+			<th>Holder</th>
 			<th>Lendable</th>
 		</tr>
 	</thead>
@@ -55,7 +55,7 @@
 			<td>${book.author}</td>
 			<td>${book.pages}</td>
 			<td>${book.recommendedAge}</td>
-			<td>${book.holder.id}</td>
+			<td>${book.holder.userName == member.userName ? '--' : book.holder.userName}</td>
 			<td>${book.lendable}</td>
 			<td> 
 				<form action="BookAppServlet">
