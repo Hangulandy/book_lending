@@ -86,6 +86,7 @@
 			<th>Pages</th>
 			<th>Recommended Age</th>
 			<th>Owner</th>
+			<th>Owner Email</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -97,13 +98,7 @@
 			<td>${book.pages}</td>
 			<td>${book.recommendedAge}</td>
 			<td>${book.owner.userName}</td>
-			<td> 
-				<form action="BookAppServlet">
-					<input type="hidden" name="action" value="returnBook"/>
-					<input type="hidden" name="bookId" value="${book.id}"/>
-					<input type="submit" value="Return Book"/>
-				</form>
-			</td>
+			<td>${book.owner.email}</td>
 		</tr>
 	</c:forEach>	
 	</tbody>
