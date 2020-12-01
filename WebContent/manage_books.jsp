@@ -44,6 +44,7 @@
 			<th>Pages</th>
 			<th>Recommended Age</th>
 			<th>Lendable</th>
+			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -56,17 +57,17 @@
 			<td>${book.recommendedAge}</td>
 			<td>${book.lendable}</td>
 			<td> 
-				<form action="BookAppServlet">
+				<form class="sideBySide" action="BookAppServlet">
 					<input type="hidden" name="action" value="editBook"/>
 					<input type="hidden" name="bookIdToEdit" value="${book.id}"/>
-					<input type="submit" value="Edit"/>
+					<input class="button" type="submit" value="Edit"/>
 				</form>
-			</td>
-			<td>
-				<form action="BookAppServlet">
+				<form class="sideBySide" action="BookAppServlet">
 					<input type="hidden" name="action" value="deleteBook"/>
 					<input type="hidden" name="bookId" value="${book.id}"/>
-					<input type="submit" value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
+					<input class="redButton"
+						   type="submit" 
+						   value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
 				</form>
 			</td>
 		</tr>
