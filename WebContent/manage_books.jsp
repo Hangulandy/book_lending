@@ -43,7 +43,6 @@
 			<th>Author</th>
 			<th>Pages</th>
 			<th>Recommended Age</th>
-			<th>Holder</th>
 			<th>Lendable</th>
 		</tr>
 	</thead>
@@ -55,7 +54,6 @@
 			<td>${book.author}</td>
 			<td>${book.pages}</td>
 			<td>${book.recommendedAge}</td>
-			<td>${book.holder.userName == member.userName ? '--' : book.holder.userName}</td>
 			<td>${book.lendable}</td>
 			<td> 
 				<form action="BookAppServlet">
@@ -75,35 +73,5 @@
 	</c:forEach>	
 	</tbody>
 </table>
-
-<H1>Borrowed Books</H1>
-<table>
-	<thead>
-		<tr>
-			<th>Book Id</th>
-			<th>Title</th>
-			<th>Author</th>
-			<th>Pages</th>
-			<th>Recommended Age</th>
-			<th>Owner</th>
-			<th>Owner Email</th>
-		</tr>
-	</thead>
-	<tbody>
-	<c:forEach items="${bookHelper.getBorrowedBooks(member.id)}" var="book">
-		<tr>
-			<td>${book.id}</td>
-			<td>${book.title}</td>
-			<td>${book.author}</td>
-			<td>${book.pages}</td>
-			<td>${book.recommendedAge}</td>
-			<td>${book.owner.userName}</td>
-			<td>${book.owner.email}</td>
-		</tr>
-	</c:forEach>	
-	</tbody>
-</table>
-
-<c:import url="/resources/includes/options.jsp" />
 
 <c:import url="/resources/includes/footer.html" />
