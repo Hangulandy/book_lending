@@ -1,28 +1,33 @@
 /* Setting style variables */
 :root { -
-	--main-bg-color: #f9f9d3;
+	--light-color: #ffffe0;
 	--main-dark-color: #1f386b;
 	--banner-height: 100px;
 }
 
 /* The styles for the elements */
 body {
+	background-color: #ffffe0;
+	color: var(--main-dark-color);
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 85%;
 	margin-left: 2em;
 	margin-right: 2em;
 }
 
+
 h1 {
 	font-size: 140%;
-	color: teal;
 	margin-bottom: .5em;
 }
 
 h2 {
 	font-size: 120%;
-	color: teal;
 	margin-bottom: .5em;
+}
+
+p {
+	font-weight: bold;
 }
 
 label {
@@ -47,6 +52,19 @@ br {
 	clear: both;
 }
 
+table, th, td {
+  border: 1px solid grey;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+}
+
+.left {
+	text-align: left;
+}
+
 /* The styles for the classes */
 .pad_top {
 	padding-top: 0.25em;
@@ -66,38 +84,56 @@ br {
 }
 
 /* The styles for specific objects */
-#hopkinsImg {
-	height: var(--banner-height);
-	float: left;
-}
 
 #bannerRight {
 	background-image: linear-gradient(to right, var(--main-dark-color),
 		black);
 	height: var(--banner-height);
+	line-height: var(--banner-height);
 	overflow: hidden;
+	text-align: center;
+}
+
+#bannerTitle {
+	display: inline-block;
+	font-size: 50px;
+	color: white;
+	margin: 5px;
 }
 
 .button {
-  font: bold 11px Arial;
-  text-decoration: none;
-  background-color: green;
-  color: white;
-  padding: 2px 6px 2px 6px;
-  border-top: 1px solid #CCCCCC;
-  border-right: 1px solid #333333;
-  border-bottom: 1px solid #333333;
-  border-left: 1px solid #CCCCCC;
+  	font: bold 11px Arial;
+  	text-decoration: none;
+  	background-color: var(--main-dark-color);
+  	color: white;
+  	padding: 2px 6px 2px 6px;
+  	border-top: 1px solid #CCCCCC;
+  	border-right: 1px solid #333333;
+  	border-bottom: 1px solid #333333;
+  	border-left: 1px solid #CCCCCC;
+  	display: inline;
+}
+
+.button:hover, .redButton:hover {
+	background-color: white;
+	color: black;
 }
 
 .redButton {
-  font: bold 11px Arial;
-  text-decoration: none;
-  background-color: red;
-  color: white;
-  padding: 2px 6px 2px 6px;
-  border-top: 1px solid #CCCCCC;
-  border-right: 1px solid #333333;
-  border-bottom: 1px solid #333333;
-  border-left: 1px solid #CCCCCC;
+  	font: bold 11px Arial;
+  	text-decoration: none;
+  	background-color: #cc0000;
+ 	color: white;
+  	padding: 2px 6px 2px 6px;
+  	border-top: 1px solid #CCCCCC;
+  	border-right: 1px solid #333333;
+  	border-bottom: 1px solid #333333;
+  	border-left: 1px solid #CCCCCC;
+  	display: inline;
+}
+
+
+
+.sideBySide {
+	display: inline;
 }

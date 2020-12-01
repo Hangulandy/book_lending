@@ -1,6 +1,10 @@
 package com.bookapp.business;
 
 import java.io.Serializable;
+import java.util.Set;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 public class Book implements Serializable, Comparable<Book> {
 
@@ -59,6 +63,7 @@ public class Book implements Serializable, Comparable<Book> {
 		return pages;
 	}
 
+	//FIXME: IS there a reason that this comes in as a String?
 	public void setPages(String pages) {
 		this.pages = myParseInt(pages, 10);
 	}
@@ -146,18 +151,56 @@ public class Book implements Serializable, Comparable<Book> {
 		errorMsg = sb.toString();
 	}
 
+	//This is mostly for testing and debugging
 	@Override
-	public int compareTo(Book other) {
-
-		if (!this.getTitle().equalsIgnoreCase(other.getTitle())) {
-			return this.getTitle().compareToIgnoreCase(other.getTitle());
+	public String toString() {
+		String delim =",";
+		return (
+				getId() + delim + 
+			    getTitle() + delim + 
+				getAuthor() + delim + 
+			    getPages() + delim + 
+				getRecommendedAge() + delim +
+			    getOwner().getId() + delim + 
+				getHolder().getId() + delim + 
+			    isLendable()
+				);
+	}
+	
+	@Override
+	public int compareTo(Book otherBook) {
+		return new CompareToBuilder()
+				.append(this.title, otherBook.getTitle())
+				.append(this.author, otherBook.getAuthor())
+				.append(this.getOwner().getId(), otherBook.getOwner().getId())
+				.toComparison();
+	}
+	public boolean isInRequestSet(Set<Request> set) {
+		
+		if (set != null) {
+			for (Request request : set) {
+				if (this.getId() == request.getBook().getId() && request.isOpen()) {
+					return true;
+				}
+			}
 		}
+		
+		return false;
+	}
 
-		if (!this.getAuthor().equalsIgnoreCase(other.getAuthor())) {
-			return this.getAuthor().compareToIgnoreCase(other.getAuthor());
-		}
-
-		return getOwner().compareTo(other.getOwner());
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		
+		Book otherBook = (Book) o;
+		
+		return new EqualsBuilder()
+			.append(this.title, otherBook.getTitle())
+			.append(this.author, otherBook.getAuthor())
+			.append(this.getOwner().getId(), otherBook.getOwner().getId())
+			.isEquals();
 	}
 
 }

@@ -57,10 +57,6 @@ public class Request implements Serializable, Comparable<Request> {
 		this.dateRequested = dateRequested;
 	}
 
-	
-
-
-
 	public Date getDateAnswered() {
 		return dateAnswered;
 	}
@@ -138,4 +134,7 @@ public class Request implements Serializable, Comparable<Request> {
 		return getId().compareTo(other.getId());
 	}
 
+	public boolean isOpen() {
+		return stage != 4;
+	}
 }

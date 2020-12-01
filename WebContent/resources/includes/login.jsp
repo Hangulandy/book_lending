@@ -1,7 +1,7 @@
 <h1>Login</h1>
 <p>Enter your login information:</p>
 <p>
-    <i class="errorMsg">${message}</i>
+    <i class="errorMsg">${loginMessage}</i>
 </p>
 
 <form action="BookAppServlet" method="post">
@@ -11,7 +11,18 @@
     <input type="email" name="email" value="${member.email}" required />
     <br>
     <label class="pad_top">Password:</label>
-    <input type="password" name="password" required />
+    <input type="password" name="password" required min=5 max=20 />
     <br>
-    <input type="submit" value="Login" class="margin_left" />
+    <input class="button" type="submit" value="Login" class="margin_left" />
 </form>
+
+
+<%
+	final Object lock = session.getId().intern();
+
+	synchronized (lock) {
+		session.setAttribute("loginMessage", null);
+	}
+%>
+
+<hr />

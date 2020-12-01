@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<c:import url="/resources/includes/header.html" />
+<c:import url="/resources/includes/header.jsp" />
 
 <%@ page import="com.bookapp.business.Member"%>
 
@@ -13,10 +13,7 @@
 </p>
 
 <p>
-    We will send an email confirmation to: <b>${member.email}</b>
+   Please login to continue 
 </p>
-
-
-<c:import url="/resources/includes/options.jsp" />
 
 <c:import url="/resources/includes/footer.html" />

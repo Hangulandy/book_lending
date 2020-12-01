@@ -1,38 +1,52 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<p>${message}</p>
+<p class="sideBySide">${searchMessage}</p>
+<c:if test="${searchBooks != null}">
+    <form class="sideBySide">
+        <input class="redButton" type="submit" value="Clear Results" />
+        <input type="hidden" name="action" value="clearSearch" />
+    </form>
+</c:if>
 
-<c:if test="${books.size() > 0}">
+<c:if test="${searchBooks.size() > 0}">
     <h1>Recent Search Results:</h1>
     <table>
         <tr>
-            <th>Title</th>
+            <th class="left">Title</th>
             <th>Author</th>
             <th>Pages</th>
             <th>Rec. Age</th>
-            <th>
-                <form>
-                    <input type="submit" value="Clear Results" />
-                    <input type="hidden" name="action" value="clearBooks" />
-                </form>
-            </th>
+            <c:if test="${member.isLoggedIn() == true}">
+                <th>Request</th>
+            </c:if>
         </tr>
-        <c:forEach items="${books}" var="book">
+        <c:forEach items="${searchBooks}" var="book">
             <tr>
-                <td>${book.title}</td>
+                <td class="left">${book.title}</td>
                 <td>${book.author}</td>
                 <td>${book.pages}</td>
-                <td>${book.id}</td>
-                <td><c:if test="${member.isLoggedIn() == true && book.owner.id != member.id && book.lendable}">
-                        <form action="BookAppServlet" method="get">
-                            <input type="hidden" name="action"
-                                value="requestBook" />
-                            <input type="hidden" name="bookRequested"
-                                value="${book.id}" />
-                            <input class="button" type="submit" value="Request" />
-                        </form>
-                    </c:if>
-                    <c:if test="${book.owner.id == member.id}"><i>This is your book.</i></c:if></td>                    
+                <td>${book.recommendedAge}</td>
+                <c:choose>
+                    <c:when test="${book.owner.id == member.id}">
+                        <td><i>This is your book.</i></td>
+                    </c:when>
+                    <c:when test="${book.isInRequestSet(requestsToOthers)}">
+                        <td>Pending Request</td>
+                    </c:when>
+                    <c:when
+                        test="${member.isLoggedIn() == true && member.canLendAndBorrow() && book.owner.id != member.id && book.lendable && book.owner.canLendAndBorrow()}">
+                        <td>
+                            <form action="BookAppServlet" method="get">
+                                <input type="hidden" name="action"
+                                    value="requestBook" />
+                                <input type="hidden" name="bookRequested"
+                                    value="${book.id}" />
+                                <input class="button" type="submit"
+                                    value="Request Book" />
+                            </form>
+                        </td>
+                    </c:when>
+                </c:choose>
             </tr>
         </c:forEach>
     </table>

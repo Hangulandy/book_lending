@@ -1,8 +1,8 @@
 
-<form action="join.jsp">
-    <input type="submit" value="Go to Join Page" />
+<form class="sideBySide" action="join.jsp">
+    <input class="button" type="submit" value="Join" />
 </form>
 
-<form action="index.jsp">
-    <input type="submit" value="Go to Login Page" />
+<form class="sideBySide" action="index.jsp">
+    <input class="button" type="submit" value="Login" />
 </form>
