@@ -26,10 +26,10 @@
 			<input type="email" name="email" value="${memberToEdit.email}" required>
 			<br>
 			<label class="pad_top">Change Password</label>
-			<input type="password" name="pw1" value="" placeholder="Optional" min=5 max=20>
+			<input type="password" name="pw1" value="" placeholder="Optional" minlength="5" maxlength="20">
 			<br>
 			<label class="pad_top">Confirm Password</label>
-			<input type="password" name="pw2" value="" placeholder="Optional" min=5 max=20>
+			<input type="password" name="pw2" value="" placeholder="Optional" minlength="5" maxlength="20">
 			<br>
 
 			<label class="pad_top">Account Type</label>
