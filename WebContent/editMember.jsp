@@ -26,8 +26,12 @@
 			<input type="email" name="email" value="${memberToEdit.email}" required>
 			<br>
 			<label class="pad_top">Change Password</label>
-			<input type="password" name="password" value="" placeholder="Optional" min=5 max=20>
+			<input type="password" name="pw1" value="" placeholder="Optional" minlength="5" maxlength="20">
 			<br>
+			<label class="pad_top">Confirm Password</label>
+			<input type="password" name="pw2" value="" placeholder="Optional" minlength="5" maxlength="20">
+			<br>
+
 			<label class="pad_top">Account Type</label>
 			<select name="accountType">
 				<option ${memberToEdit.accountType.id == 1 ? 'selected' : ''} value="1">Member</option>
@@ -36,7 +40,7 @@
 			</select>
 			<hr>
 			<label>&nbsp;</label>
-			<input class="button" type="submit" value="Edit" class="margin_left" />
+			<input class="button" type="submit" value="Update" class="margin_left" />
 		</form>
 		<form class="sideBySide" action="admin.jsp" method="post">
 			<input class="button" type="submit" value="Go Back" />

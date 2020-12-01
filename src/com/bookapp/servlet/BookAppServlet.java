@@ -250,7 +250,6 @@ public class BookAppServlet extends HttpServlet {
 				session.setAttribute("requestMessage", requestMessage);
 			}
 
-			//FIXME: Need to change holder id on book
 			// ACTION: Receive book (as requester)
 			if (action.equalsIgnoreCase("receive")) {
 
@@ -301,7 +300,6 @@ public class BookAppServlet extends HttpServlet {
 				session.setAttribute("requestMessage", requestMessage);
 			}
 
-			//FIXME: Need to change holder id on book
 			// ACTION: Return Book to Owner
 			if (action.equalsIgnoreCase("returnBook")) {
 
@@ -421,6 +419,7 @@ public class BookAppServlet extends HttpServlet {
 			// ACTION: Update Member
 			if (action.equalsIgnoreCase("updateMember")) {
 				System.out.println("UPDATING MEMBER");
+				boolean valid = true;
 				int memberId = Integer.parseInt(request.getParameter("memberId"));
 				if (member != null && member.isLoggedIn()
 						&& member.getAccountType().getTitle().equalsIgnoreCase("admin"))
@@ -432,10 +431,16 @@ public class BookAppServlet extends HttpServlet {
 						updatedMember.setId(memberId);
 						updatedMember.setLoggedIn(oldMember.isLoggedIn());
 						
+						String password = request.getParameter("pw1");
 						// Check if password changed 
-						String password = request.getParameter("password");
 						if(StringUtils.isNotBlank(password)) {
-							updatedMember.setPassword(password);
+							if (pwSame(request)) {
+								updatedMember.setPassword(password);
+							} else {
+								updatedMember.setPassword(oldMember.getPassword());
+								request.setAttribute("message", "Unable to update member! Passwords do not match"); 
+								valid = false;
+							}
 						} else {
 							updatedMember.setPassword(oldMember.getPassword());
 						}
@@ -444,12 +449,13 @@ public class BookAppServlet extends HttpServlet {
 						updatedMember
 							.setAccountType(new AccountType(
 									Integer.parseInt(request.getParameter("accountType"))));
-
-						int updated = MemberDB.update(updatedMember);
-						if (updated == 1) {
-							request.setAttribute("message", "Updated member!");
-						} else {
-							request.setAttribute("message", "Unable to update member!"); 
+						if (valid) {
+							int updated = MemberDB.update(updatedMember);
+							if (updated == 1) {
+								request.setAttribute("message", "Updated member!");
+							} else {
+								request.setAttribute("message", "Unable to update member!"); 
+							}
 						}
 					}
 				}

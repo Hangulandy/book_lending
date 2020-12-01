@@ -13,7 +13,7 @@
 </p>
 
 <p>
-    We will send an email confirmation to: <b>${member.email}</b>
+   Please login to continue 
 </p>
 
 <c:import url="/resources/includes/footer.html" />

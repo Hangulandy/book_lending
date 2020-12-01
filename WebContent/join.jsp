@@ -29,10 +29,10 @@
     <input type="text" name="userName" value="${member.userName}" required />
     <br>
     <label class="pad_top">Password:</label>
-    <input type="password" name="pw1" required />
+    <input type="password" name="pw1" required minlength="5" maxlength="20"/>
     <br>
     <label class="pad_top">Confirm PW:</label>
-    <input type="password" name="pw2" required />
+    <input type="password" name="pw2" required minlength="5" maxlength="20"/>
     <br>
     <label>&nbsp;</label>
     <input class="button" type="submit" value="Join Now" class="margin_left" />

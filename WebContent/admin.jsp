@@ -24,6 +24,7 @@
 		<th>User Name</th>
 		<th>Email </th>
 		<th>Account Type</th>
+		<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>

@@ -43,8 +43,8 @@
 			<th>Author</th>
 			<th>Pages</th>
 			<th>Recommended Age</th>
-			<th>Holder</th>
 			<th>Lendable</th>
+			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -55,55 +55,24 @@
 			<td>${book.author}</td>
 			<td>${book.pages}</td>
 			<td>${book.recommendedAge}</td>
-			<td>${book.holder.userName == member.userName ? '--' : book.holder.userName}</td>
 			<td>${book.lendable}</td>
 			<td> 
-				<form action="BookAppServlet">
+				<form class="sideBySide" action="BookAppServlet">
 					<input type="hidden" name="action" value="editBook"/>
 					<input type="hidden" name="bookIdToEdit" value="${book.id}"/>
-					<input type="submit" value="Edit"/>
+					<input class="button" type="submit" value="Edit"/>
 				</form>
-			</td>
-			<td>
-				<form action="BookAppServlet">
+				<form class="sideBySide" action="BookAppServlet">
 					<input type="hidden" name="action" value="deleteBook"/>
 					<input type="hidden" name="bookId" value="${book.id}"/>
-					<input type="submit" value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
+					<input class="redButton"
+						   type="submit" 
+						   value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
 				</form>
 			</td>
 		</tr>
 	</c:forEach>	
 	</tbody>
 </table>
-
-<H1>Borrowed Books</H1>
-<table>
-	<thead>
-		<tr>
-			<th>Book Id</th>
-			<th>Title</th>
-			<th>Author</th>
-			<th>Pages</th>
-			<th>Recommended Age</th>
-			<th>Owner</th>
-			<th>Owner Email</th>
-		</tr>
-	</thead>
-	<tbody>
-	<c:forEach items="${bookHelper.getBorrowedBooks(member.id)}" var="book">
-		<tr>
-			<td>${book.id}</td>
-			<td>${book.title}</td>
-			<td>${book.author}</td>
-			<td>${book.pages}</td>
-			<td>${book.recommendedAge}</td>
-			<td>${book.owner.userName}</td>
-			<td>${book.owner.email}</td>
-		</tr>
-	</c:forEach>	
-	</tbody>
-</table>
-
-<c:import url="/resources/includes/options.jsp" />
 
 <c:import url="/resources/includes/footer.html" />
