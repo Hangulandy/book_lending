@@ -132,7 +132,7 @@ public class BookAppServlet extends HttpServlet {
 				TreeSet<Book> books = BookDB.search(searchString);
 				session.setAttribute("searchBooks", books);
 				session.setAttribute("searchMessage", String.format("Your search returned %d results. ", books.size()));
-				
+
 				if (memberLoginGood(member)) {
 					session.setAttribute("requestsToOthers", RequestDB.getRequestsToOthers(member.getId()));
 				}
@@ -175,11 +175,11 @@ public class BookAppServlet extends HttpServlet {
 			// ACTION: Request a book
 			if (action.equalsIgnoreCase("requestBook")) {
 				session.setAttribute("message", submitRequestToBorrow(request, member));
-				
+
 				if (memberLoginGood(member)) {
 					session.setAttribute("requestsToOthers", RequestDB.getRequestsToOthers(member.getId()));
 				}
-				
+
 			}
 
 			// ACTION: Manage Requests
@@ -220,7 +220,6 @@ public class BookAppServlet extends HttpServlet {
 					}
 				} else {
 					requestMessage = "You need to login to manage requests. Please login or join or community. ";
-					url = "/index.jsp";
 				}
 				session.setAttribute("requestMessage", requestMessage);
 			}
@@ -324,25 +323,25 @@ public class BookAppServlet extends HttpServlet {
 				}
 				session.setAttribute("requestMessage", requestMessage);
 			}
-			
+
 			// ACTION: Edit a book
 			if (action.equalsIgnoreCase("editBook")) {
 				member = MemberDB.checkLogin(member);
-				
+
 				if (member != null && member.isLoggedIn()) {
 					int bookIdToEdit = Integer.parseInt(request.getParameter("bookIdToEdit"));
 					Book bookToEdit = BookDB.selectBookById(bookIdToEdit);
-					
-					//Check that the book exists and person editing the book is the owner
+
+					// Check that the book exists and person editing the book is the owner
 					if (bookToEdit != null && bookToEdit.getOwner().getId() == member.getId()) {
 						url = "/editBook.jsp";
-						
-						//No need to keep this in the session
+
+						// No need to keep this in the session
 						request.setAttribute("bookToEdit", bookToEdit);
 					} else {
 						request.setAttribute("message", "Unable to edit book");
 					}
-					
+
 				}
 			}
 			// ACTION: Update book
@@ -365,96 +364,104 @@ public class BookAppServlet extends HttpServlet {
 				request.setAttribute("message", "Unable to update book");
 				url = "/manage_books.jsp";
 			}
-			
+
 			// ACTION: Delete a book
 			if (action.equalsIgnoreCase("deleteBook")) {
-				System.out.println("DELETING BOOK");
-				member = MemberDB.checkLogin(member);
-				int bookId = Integer.parseInt(request.getParameter("bookId"));
-				if (member != null && member.isLoggedIn()) {
-					Book bookToDelete = BookDB.selectBookById(bookId);
 
-					if (bookToDelete != null && bookToDelete.getOwner().getId() == member.getId() &&
-							bookToDelete.getHolder().getId() == member.getId()) {
-						
-						// Get requests for deleted book and deny
-						TreeSet<Request> bookRequests = RequestDB.getRequestsToMe(member.getId());
-						bookRequests.stream()
-							.filter(req -> req.getBook().getId() == bookId)
-							.forEach(RequestDB::delete);
+				if (memberLoginGood(member)) {
 
-						BookDB.delete(bookToDelete);
-						
+					try {
+						int bookId = Integer.parseInt(request.getParameter("bookId"));
+
+						Book bookToDelete = BookDB.selectBookById(bookId);
+
+						if (bookToDelete != null && bookToDelete.getOwner().getId() == member.getId()) {
+
+							// Get requests for deleted book and deny
+							TreeSet<Request> bookRequests = RequestDB.getRequestsToMe(member.getId());
+							bookRequests.stream().filter(req -> req.getBook().getId() == bookId)
+									.forEach(RequestDB::delete);
+
+							BookDB.delete(bookToDelete);
+							boolean successful = false;
+							if (successful) {
+								request.setAttribute("message",
+										String.format("Successfully deleted %s", bookToDelete.getTitle()));
+							} else {
+								request.setAttribute("message", "Unable to delete book. ");
+							}
+						} else {
+							request.setAttribute("message", "Unable to delete book. ");
+						}
+					} catch (Exception e) {
+						request.setAttribute("message", "Unable to use that book id");
 					}
+				} else {
+					request.setAttribute("message", "You must login to delete a book. ");
 				}
-				request.setAttribute("message", "Unable to delete book");
 				url = "/manage_books.jsp";
-
 			}
-			
+
 			// Edit Member
 			if (action.equalsIgnoreCase("editMember")) {
 				System.out.println("EDIT MEMBER");
 				member = MemberDB.checkLogin(member);
-				if (member != null && member.isLoggedIn() 
-						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) 
-				{
+				if (member != null && member.isLoggedIn()
+						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) {
 					int memberIdToEdit = Integer.parseInt(request.getParameter("memberIdToEdit"));
 					Member memberToEdit = MemberDB.getMember(memberIdToEdit);
 
 					if (memberToEdit != null) {
 						url = "/editMember.jsp";
 
-						//No need to keep this in the session
+						// No need to keep this in the session
 						request.setAttribute("memberToEdit", memberToEdit);
 						url = "/editMember.jsp";
 					} else {
 						url = "/admin.jsp";
 						request.setAttribute("message", "Unable to edit member");
-						
+
 					}
 				}
 			}
-			
+
 			// ACTION: Update Member
 			if (action.equalsIgnoreCase("updateMember")) {
 				System.out.println("UPDATING MEMBER");
 				boolean valid = true;
 				int memberId = Integer.parseInt(request.getParameter("memberId"));
 				if (member != null && member.isLoggedIn()
-						&& member.getAccountType().getTitle().equalsIgnoreCase("admin"))
-				{
+						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) {
 					Member oldMember = MemberDB.getMember(memberId);
 
 					if (oldMember != null) {
 						Member updatedMember = buildMemberFromRequest(request);
 						updatedMember.setId(memberId);
 						updatedMember.setLoggedIn(oldMember.isLoggedIn());
-						
+
 						String password = request.getParameter("pw1");
-						// Check if password changed 
-						if(StringUtils.isNotBlank(password)) {
+						// Check if password changed
+						if (StringUtils.isNotBlank(password)) {
 							if (pwSame(request)) {
 								updatedMember.setPassword(password);
 							} else {
 								updatedMember.setPassword(oldMember.getPassword());
-								request.setAttribute("message", "Unable to update member! Passwords do not match"); 
+								request.setAttribute("message", "Unable to update member! Passwords do not match");
 								valid = false;
 							}
 						} else {
 							updatedMember.setPassword(oldMember.getPassword());
 						}
-						
+
 						// get account type and set
 						updatedMember
-							.setAccountType(new AccountType(
-									Integer.parseInt(request.getParameter("accountType"))));
+								.setAccountType(new AccountType(Integer.parseInt(request.getParameter("accountType"))));
 						if (valid) {
 							int updated = MemberDB.update(updatedMember);
 							if (updated == 1) {
 								request.setAttribute("message", "Updated member!");
 							} else {
-								request.setAttribute("message", "Unable to update member!"); 
+								request.setAttribute("message", "Unable to update member!");
 							}
 						}
 					}
@@ -470,7 +477,6 @@ public class BookAppServlet extends HttpServlet {
 	}
 
 	private boolean memberLoginGood(Member member) {
-
 		member = MemberDB.checkLogin(member);
 		return member != null && member.isLoggedIn();
 	}
@@ -490,7 +496,8 @@ public class BookAppServlet extends HttpServlet {
 			return "An invalid book id was submitted. ";
 		}
 
-		// TODO - verify with the BookDB class that this is a valid book id, and use that
+		// TODO - verify with the BookDB class that this is a valid book id, and use
+		// that
 		// as the condition here, return message if not
 
 		if (!requester.canLendAndBorrow()) {
@@ -527,7 +534,7 @@ public class BookAppServlet extends HttpServlet {
 			String pages = request.getParameter("pages");
 			String recommendedAge = request.getParameter("recommendedAge");
 			String isLendable = request.getParameter("lendable");
-			
+
 			if (title != null && author != null) {
 				book = new Book();
 				book.setTitle(title);
@@ -536,7 +543,7 @@ public class BookAppServlet extends HttpServlet {
 				book.setRecommendedAge(recommendedAge);
 				book.setOwner(member);
 				book.setHolder(member);
-				//If isLendable param not in request then default to true
+				// If isLendable param not in request then default to true
 				book.setLendable(isLendable != null ? BooleanUtils.toBoolean(isLendable) : true);
 			}
 		}
