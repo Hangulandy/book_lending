@@ -6,9 +6,6 @@
     <c:import url="/resources/includes/cannot_view.jsp" />
 </c:if>
 
-<p>
-    <i>${message}</i>
-</p>
 
 <c:if test="${member.isLoggedIn() == true}">
     <h1>Edit book:</h1>
@@ -35,7 +32,7 @@
         </select>
         <hr>
         <label>&nbsp;</label>
-	    <input class="button" type="submit" value="Edit" class="margin_left" />
+	    <input class="button" type="submit" value="Update" class="margin_left" />
     </form>
         <form class="sideBySide" action="manage_books.jsp" method="post">
 			<input class="button" type="submit" value="Go Back" />

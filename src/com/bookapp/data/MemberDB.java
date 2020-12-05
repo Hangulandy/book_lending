@@ -38,7 +38,12 @@ public class MemberDB {
 		}
 	}
 	
-	public static int update(Member member) {
+	public static boolean update(Member member) {
+		
+		if (member == null ) {
+			return false;
+		}
+		
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
@@ -61,11 +66,11 @@ public class MemberDB {
 			ps.setInt(6, member.getAccountType().getId());
 			ps.setInt(7, member.getId());
 			
-			return ps.executeUpdate();
+			return ps.executeUpdate() > 0;
 			
 		} catch (SQLException e) {
 			System.out.println(e);
-			return 0;
+			return false;
 		} finally {
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);
@@ -146,8 +151,15 @@ public class MemberDB {
 		return output;
 	}
 
-	public static Member getMember(int memberId) {
+	public static Member getMember(String parameter) {
+		int memberId = 0;
 
+		try {
+			memberId = Integer.parseInt(parameter);
+		} catch (NumberFormatException nfe) {
+			return null;
+		}
+		
 		Member member = null;
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
