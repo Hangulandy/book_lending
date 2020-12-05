@@ -154,12 +154,21 @@ public class BookDB {
 	 * @param id
 	 * @return
 	 */
-	public static Book selectBookById(int bookId) {
-ConnectionPool pool = ConnectionPool.getInstance();
+	public static Book selectBookById(String parameter) {
+		
+		int bookId = 0;
+
+		try {
+			bookId = Integer.parseInt(parameter);
+		} catch (NumberFormatException nfe) {
+			return null;
+		}
+
+		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
+
 		String query = "SELECT * FROM Book AS b "
 				+ "JOIN Member AS o ON b.ownerId = o.id "
 				+ "JOIN AccountType AS oa ON o.accountType = oa.id "
@@ -167,18 +176,17 @@ ConnectionPool pool = ConnectionPool.getInstance();
 				+ "JOIN AccountType AS ha ON h.accountType = ha.id "
 				+ "WHERE b.id = ?";
 
-		
-try {
+		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, bookId);
 			rs = ps.executeQuery();
-			
+
 			Book book = null;
 			if (rs.next()) {
 				book = resultToBook(rs);
 			}
 			return book;
-			
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			return null;
@@ -194,7 +202,12 @@ try {
 	 * @param book
 	 * @return
 	 */
-	public static int update(Book book) {
+	public static boolean update(Book book) {
+		
+		if (book == null) {
+			return false;
+		}
+		
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
@@ -218,18 +231,24 @@ try {
 			ps.setInt(6, book.getHolder().getId());
 			ps.setBoolean(7, book.isLendable());
 			ps.setInt(8, book.getId());
-			return ps.executeUpdate();
+			return ps.executeUpdate() > 0;
 			
 		} catch (SQLException e) {
 			System.out.println(e);
-			return 0;
+			return false;
 		} finally {
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);
 		}
 	}
 	
-	public static int delete(Book book) {
+	public static boolean delete(Book book) {
+		
+		if (book == null) {
+			System.out.println("HERE");
+			return false;
+		}
+		
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
@@ -239,11 +258,11 @@ try {
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, book.getId());
-			return ps.executeUpdate();
+			return ps.executeUpdate() > 0;
 			
 		} catch (SQLException e) {
 			System.out.println(e);
-			return 0;
+			return false;
 		} finally {
 			DBUtil.closePreparedStatement(ps);
 			pool.freeConnection(connection);

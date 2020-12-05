@@ -11,7 +11,7 @@
 
 <c:otherwise>
 <p>
-	<i>${message}</i>
+	<i>${requestMessage}</i>
 </p>
 
    <H1>Manage Members</H1>

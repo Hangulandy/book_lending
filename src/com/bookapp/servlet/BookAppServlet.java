@@ -326,152 +326,201 @@ public class BookAppServlet extends HttpServlet {
 
 			// ACTION: Edit a book
 			if (action.equalsIgnoreCase("editBook")) {
-				member = MemberDB.checkLogin(member);
 
-				if (member != null && member.isLoggedIn()) {
-					int bookIdToEdit = Integer.parseInt(request.getParameter("bookIdToEdit"));
-					Book bookToEdit = BookDB.selectBookById(bookIdToEdit);
+				String requestMessage = null;
 
-					// Check that the book exists and person editing the book is the owner
-					if (bookToEdit != null && bookToEdit.getOwner().getId() == member.getId()) {
-						url = "/editBook.jsp";
+				if (memberLoginGood(member)) {
+					try {
+						Book bookToEdit = BookDB.selectBookById(request.getParameter("bookIdToEdit"));
 
-						// No need to keep this in the session
-						request.setAttribute("bookToEdit", bookToEdit);
-					} else {
-						request.setAttribute("message", "Unable to edit book");
+						// Check that the book exists and person editing the book is the owner
+						if (bookToEdit != null && bookToEdit.getOwner().getId() == member.getId()) {
+							url = "/editBook.jsp";
+
+							// No need to keep this in the session
+							request.setAttribute("bookToEdit", bookToEdit);
+						} else {
+							requestMessage = "Unable to edit book";
+							url = "/manage_books.jsp";
+						}
+
+					} catch(Exception e) {
+						requestMessage = "Unable to edit book";
+						url = "/manage_books.jsp";
 					}
-
+				} else {
+					requestMessage = "You must login to edit a book.";
 				}
+				session.setAttribute("requestMessage", requestMessage);
 			}
+			
 			// ACTION: Update book
 			if (action.equalsIgnoreCase("updateBook")) {
-				System.out.println("UPDATING BOOK");
-				member = MemberDB.checkLogin(member);
-				int bookId = Integer.parseInt(request.getParameter("bookId"));
-				if (member != null && member.isLoggedIn()) {
-					Book oldBook = BookDB.selectBookById(bookId);
+				
+				String requestMessage = null;
+				
+				if (memberLoginGood(member)) {
+					try {
+						Book oldBook = BookDB.selectBookById(request.getParameter("bookId"));
 
-					if (oldBook != null && oldBook.getOwner().getId() == member.getId()) {
-						Book updatedBook = buildBookFromData(request, member);
-						// Get values from book before updating
-						updatedBook.setId(bookId);
-						updatedBook.setHolder(oldBook.getHolder());
+						if (oldBook != null && oldBook.getOwner().getId() == member.getId()) {
+							Book updatedBook = buildBookFromData(request, member);
+							// Get values from book before updating
+							updatedBook.setId(oldBook.getId());
+							updatedBook.setHolder(oldBook.getHolder());
 
-						int updated = BookDB.update(updatedBook);
+							boolean success = BookDB.update(updatedBook);
+							
+							if (success) {
+								requestMessage = String.format("%s was successfully updated.", updatedBook.getTitle());
+							} else {
+								requestMessage = String.format("%s was unable to be updated.", updatedBook.getTitle());
+							}
+						} else {
+							requestMessage = "Unable to update book";
+							url = "/manage_books.jsp";	
+						}
+					} catch (Exception e) {
+						requestMessage = "Unable to update book";
+						url = "/manage_books.jsp";
 					}
+				} else {
+					requestMessage = "You must login to update a book.";
 				}
-				request.setAttribute("message", "Unable to update book");
 				url = "/manage_books.jsp";
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Delete a book
 			if (action.equalsIgnoreCase("deleteBook")) {
 
+				String requestMessage = null;
+
 				if (memberLoginGood(member)) {
-
 					try {
-						int bookId = Integer.parseInt(request.getParameter("bookId"));
+						Book bookToDelete = BookDB.selectBookById(request.getParameter("bookId"));
 
-						Book bookToDelete = BookDB.selectBookById(bookId);
+						if (bookToDelete != null && 
+								bookToDelete.getOwner().getId().compareTo(member.getId()) == 0) {
 
-						if (bookToDelete != null && bookToDelete.getOwner().getId() == member.getId()) {
-
-							// Get requests for deleted book and deny
+							// Get stage 1 requests for deleted book and delete 
 							TreeSet<Request> bookRequests = RequestDB.getRequestsToMe(member.getId());
-							bookRequests.stream().filter(req -> req.getBook().getId() == bookId)
-									.forEach(RequestDB::delete);
+							bookRequests.stream().filter(req -> 
+									req.getBook().getId() == bookToDelete.getId() &&
+									req.getStage() == 1
+							)
+							.forEach(RequestDB::delete);
 
-							BookDB.delete(bookToDelete);
-							boolean successful = false;
-							if (successful) {
-								request.setAttribute("message",
-										String.format("Successfully deleted %s", bookToDelete.getTitle()));
+							boolean success = BookDB.delete(bookToDelete);
+							if (success) {
+								requestMessage = String.format("Successfully deleted %s", bookToDelete.getTitle());
 							} else {
-								request.setAttribute("message", "Unable to delete book. ");
+								requestMessage = "Unable to delete book. ";
 							}
 						} else {
-							request.setAttribute("message", "Unable to delete book. ");
+							requestMessage = "Unable to delete book. ";
 						}
 					} catch (Exception e) {
-						request.setAttribute("message", "Unable to use that book id");
+						requestMessage = "Unable to use that book id";
 					}
 				} else {
-					request.setAttribute("message", "You must login to delete a book. ");
+					requestMessage = "You must login to delete a book. ";
 				}
 				url = "/manage_books.jsp";
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// Edit Member
 			if (action.equalsIgnoreCase("editMember")) {
-				System.out.println("EDIT MEMBER");
-				member = MemberDB.checkLogin(member);
-				if (member != null && member.isLoggedIn()
-						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) {
-					int memberIdToEdit = Integer.parseInt(request.getParameter("memberIdToEdit"));
-					Member memberToEdit = MemberDB.getMember(memberIdToEdit);
+				
+				String requestMessage = null;
+				url = "/admin.jsp";
+				
+				if (adminLoginGood(member)) {
+					try {
+						Member memberToEdit = MemberDB.getMember(request.getParameter("memberIdToEdit"));
 
-					if (memberToEdit != null) {
-						url = "/editMember.jsp";
+						if (memberToEdit != null) {
+							// No need to keep this in the session
+							request.setAttribute("memberToEdit", memberToEdit);
+							url = "/editMember.jsp";
+						} else {
+							request.setAttribute("message", "Unable to edit member");
 
-						// No need to keep this in the session
-						request.setAttribute("memberToEdit", memberToEdit);
-						url = "/editMember.jsp";
-					} else {
-						url = "/admin.jsp";
-						request.setAttribute("message", "Unable to edit member");
-
+						}
+					} catch (Exception e) {
+					requestMessage = "Unable to edit member.";
 					}
+				} else {
+					requestMessage = "You need to login as an administrator to manage members.";
+					url = "/index.jsp";
 				}
+
+				session.setAttribute("requestMessage", requestMessage);
 			}
 
 			// ACTION: Update Member
 			if (action.equalsIgnoreCase("updateMember")) {
-				System.out.println("UPDATING MEMBER");
-				boolean valid = true;
-				int memberId = Integer.parseInt(request.getParameter("memberId"));
-				if (member != null && member.isLoggedIn()
-						&& member.getAccountType().getTitle().equalsIgnoreCase("admin")) {
-					Member oldMember = MemberDB.getMember(memberId);
+				String requestMessage = null;
+				boolean success = true;
 
-					if (oldMember != null) {
-						Member updatedMember = buildMemberFromRequest(request);
-						updatedMember.setId(memberId);
-						updatedMember.setLoggedIn(oldMember.isLoggedIn());
+				if (adminLoginGood(member)) {
+					try {
+						Member oldMember = MemberDB.getMember(request.getParameter("memberId"));
 
-						String password = request.getParameter("pw1");
-						// Check if password changed
-						if (StringUtils.isNotBlank(password)) {
-							if (pwSame(request)) {
-								updatedMember.setPassword(password);
+						if (oldMember != null) {
+							Member updatedMember = buildMemberFromRequest(request);
+							updatedMember.setId(oldMember.getId());
+							updatedMember.setLoggedIn(oldMember.isLoggedIn());
+
+							String password = request.getParameter("pw1");
+							// Check if password was changed
+							if (StringUtils.isNotBlank(password)) {
+								if (pwSame(request)) {
+									updatedMember.setPassword(password);
+								} else {
+									updatedMember.setPassword(oldMember.getPassword());
+									requestMessage = "Unable to update member! Passwords do not match";
+									success = false;
+								}
 							} else {
 								updatedMember.setPassword(oldMember.getPassword());
-								request.setAttribute("message", "Unable to update member! Passwords do not match");
-								valid = false;
+							}
+
+							// get account type and set
+							int accoutTypeInt = Integer.parseInt(request.getParameter("accountType"));
+							
+							if(accoutTypeInt >= 1 && accoutTypeInt <= 3) {
+								updatedMember.setAccountType(new AccountType(accoutTypeInt));
+							} else {
+								success = false;
+								requestMessage = "Unable to update member! Passwords do not match";
+							}
+							
+							if (success) {
+								if (MemberDB.update(updatedMember)) {
+									requestMessage = "Updated member " + updatedMember.getUserName();
+								} else {
+									requestMessage = "Unable to update member!";
+								}
 							}
 						} else {
-							updatedMember.setPassword(oldMember.getPassword());
+							requestMessage = "Unable to update member";
 						}
-
-						// get account type and set
-						updatedMember
-								.setAccountType(new AccountType(Integer.parseInt(request.getParameter("accountType"))));
-						if (valid) {
-							int updated = MemberDB.update(updatedMember);
-							if (updated == 1) {
-								request.setAttribute("message", "Updated member!");
-							} else {
-								request.setAttribute("message", "Unable to update member!");
-							}
-						}
+					} catch (Exception e) {
+						requestMessage = "Unable to update member";
 					}
+					url = "/admin.jsp";
+				}  else {
+					requestMessage = "You need to login as an administrator to manage members.";
+					url = "/index.jsp";
 				}
-				url = "/admin.jsp";
+
+				session.setAttribute("requestMessage", requestMessage);
 			}
 			// OTHER ACTIONS GO HERE
 
-		}
-
+	}
 		// Forward the request
 		getServletContext().getRequestDispatcher(url).forward(request, response);
 	}
@@ -480,6 +529,14 @@ public class BookAppServlet extends HttpServlet {
 		member = MemberDB.checkLogin(member);
 		return member != null && member.isLoggedIn();
 	}
+	
+	private boolean adminLoginGood(Member member) {
+		member = MemberDB.checkLogin(member);
+		return member != null && 
+			   member.isLoggedIn() && 
+			   member.getAccountType().getTitle().equalsIgnoreCase("admin");
+	}
+
 
 	private String submitRequestToBorrow(HttpServletRequest request, Member requester) {
 
