@@ -9,7 +9,7 @@
 </c:if>
 
 <p>
-    <i>${message}</i>
+    <i>${requestMessage}</i>
 </p>
 
 <c:if test="${member.isLoggedIn() == true}">
