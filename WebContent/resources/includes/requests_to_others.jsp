@@ -36,7 +36,7 @@
                         <c:when test="${request.dateAnswered != null}">${request.dateAnswered}</c:when>
                     </c:choose></td>
                 <td><c:choose>
-                        <c:when test="${request.getStage() ==2}">
+                        <c:when test="${request.getStage() ==2 && request.book.owner.id == request.book.holder.id}">
                             <form class="sideBySide" action="BookAppServlet"
                                 method="get">
                                 <input type="hidden" name="action"

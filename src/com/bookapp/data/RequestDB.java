@@ -63,19 +63,18 @@ public class RequestDB {
 			pool.freeConnection(connection);
 		}
 	}
-	
+
 	public static int delete(Request request) {
 		ConnectionPool pool = ConnectionPool.getInstance();
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
-		
-		String query = "DELETE FROM Request "
-				+ "WHERE id = ?";
+
+		String query = "DELETE FROM Request " + "WHERE id = ?";
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setInt(1, request.getId());
 			return ps.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			return 0;
@@ -84,8 +83,7 @@ public class RequestDB {
 			pool.freeConnection(connection);
 		}
 	}
-		
-	
+
 	public static TreeSet<Request> getRequestsToMe(int ownerId) {
 
 		TreeSet<Request> output = new TreeSet<Request>();
@@ -108,7 +106,7 @@ public class RequestDB {
 				requester.setEmail(rs.getString(18));
 				requester.setUserName(rs.getString(21));
 
-				//FIXME: Not getting whole book object
+				// FIXME: Not getting whole book object
 				Book book = new Book();
 				book.setId(rs.getInt(9));
 				book.setTitle(rs.getString(10));
@@ -143,7 +141,7 @@ public class RequestDB {
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 
-		String query = "SELECT * FROM Request AS r INNER JOIN Book AS b ON r.bookId = b.id INNER JOIN Member AS owner ON b.ownerId = owner.id WHERE r.requesterId = ?";
+		String query = "SELECT * FROM Request AS r INNER JOIN Book AS b ON r.bookId = b.id INNER JOIN Member AS owner ON b.ownerId = owner.id INNER JOIN Member As holder ON b.holderId = holder.id WHERE r.requesterId = ?";
 
 		try {
 			ps = connection.prepareStatement(query);
@@ -157,11 +155,17 @@ public class RequestDB {
 				owner.setEmail(rs.getString(18));
 				owner.setUserName(rs.getString(21));
 
+				Member holder = new Member();
+				holder.setId(rs.getInt(24));
+				holder.setEmail(rs.getString(25));
+				holder.setUserName(rs.getString(28));
+
 				Book book = new Book();
 				book.setId(rs.getInt(9));
 				book.setTitle(rs.getString(10));
 				book.setAuthor(rs.getString(11));
 				book.setOwner(owner);
+				book.setHolder(holder);
 
 				Request request = new Request();
 				request.setId(rs.getInt(1));
@@ -302,23 +306,26 @@ public class RequestDB {
 		Connection connection = pool.getConnection();
 		PreparedStatement ps = null;
 
-		java.util.Date date = new java.util.Date();
-		Date sqlDate = new java.sql.Date(date.getTime());
+		if (isWithOwner(requestId)) {
+			java.util.Date date = new java.util.Date();
+			Date sqlDate = new java.sql.Date(date.getTime());
 
-		String query = "Update Request SET dateReceivedByRequester = ? WHERE id = ? AND requesterId = ?";
+			String query = "Update Request AS r JOIN Book AS b ON r.bookId = b.id SET r.dateReceivedByRequester = ?, b.holderId = ? WHERE r.id = ? AND r.requesterId = ?";
 
-		try {
-			ps = connection.prepareStatement(query);
-			ps.setDate(1, sqlDate);
-			ps.setInt(2, requestId);
-			ps.setInt(3, member.getId());
-			return ps.executeUpdate() > 0;
+			try {
+				ps = connection.prepareStatement(query);
+				ps.setDate(1, sqlDate);
+				ps.setInt(2, member.getId());
+				ps.setInt(3, requestId);
+				ps.setInt(4, member.getId());
+				return ps.executeUpdate() > 0;
 
-		} catch (SQLException e) {
-			System.out.println(e);
-		} finally {
-			DBUtil.closePreparedStatement(ps);
-			pool.freeConnection(connection);
+			} catch (SQLException e) {
+				System.out.println(e);
+			} finally {
+				DBUtil.closePreparedStatement(ps);
+				pool.freeConnection(connection);
+			}
 		}
 		return false;
 	}
@@ -345,13 +352,14 @@ public class RequestDB {
 		java.util.Date date = new java.util.Date();
 		Date sqlDate = new java.sql.Date(date.getTime());
 
-		String query = "Update Request SET dateClosedByOwner = ?, remarks = ? WHERE id = ?";
+		String query = "Update Request AS r JOIN Book AS b ON r.bookId = b.id SET b.holderId = ?, r.dateClosedByOwner = ?, r.remarks = ? WHERE r.id = ?";
 
 		try {
 			ps = connection.prepareStatement(query);
-			ps.setDate(1, sqlDate);
-			ps.setString(2, "Returned. ");
-			ps.setInt(3, requestId);
+			ps.setInt(1, member.getId());
+			ps.setDate(2, sqlDate);
+			ps.setString(3, "Returned. ");
+			ps.setInt(4, requestId);
 			return ps.executeUpdate() > 0;
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -396,6 +404,28 @@ public class RequestDB {
 		}
 		return false;
 
+	}
+
+	public static boolean isWithOwner(int requestId) {
+
+		ConnectionPool pool = ConnectionPool.getInstance();
+		Connection connection = pool.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String query = "SELECT * FROM Request AS r JOIN Book AS b ON r.bookId = b.id WHERE r.id = ? AND b.ownerId = b.holderId";
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setInt(1, requestId);
+			rs = ps.executeQuery();
+			return rs.next();
+		} catch (SQLException e) {
+			System.out.println(e);
+		} finally {
+			DBUtil.closePreparedStatement(ps);
+			pool.freeConnection(connection);
+		}
+		return false;
 	}
 
 }

@@ -254,7 +254,7 @@ public class BookAppServlet extends HttpServlet {
 
 				String requestMessage = null;
 
-				if (memberLoginGood(member)) {
+				if (memberLoginGood(member)) {					
 					boolean success = RequestDB.receive(member, request.getParameter("requestId"));
 
 					session.setAttribute("requestsToMe", RequestDB.getRequestsToMe(member.getId()));

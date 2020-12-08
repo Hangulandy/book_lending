@@ -137,4 +137,5 @@ public class Request implements Serializable, Comparable<Request> {
 	public boolean isOpen() {
 		return stage != 4;
 	}
+
 }
