@@ -67,7 +67,7 @@
 					<input type="hidden" name="bookId" value="${book.id}"/>
 					<input class="redButton"
 						   type="submit" 
-						   value="Delete" ${book.owner.id != book.holder.id ? 'disabled' : '' }/>
+						   value="Delete"/>
 				</form>
 			</td>
 		</tr>
