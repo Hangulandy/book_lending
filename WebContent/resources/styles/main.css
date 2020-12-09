@@ -132,8 +132,11 @@ table {
   	display: inline;
 }
 
-
-
 .sideBySide {
 	display: inline;
+}
+
+.deleteWarning {
+	color: #D8000C;
+    background-color: #FFD2D2;	
 }
