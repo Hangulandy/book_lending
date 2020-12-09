@@ -63,7 +63,7 @@
 					<input class="button" type="submit" value="Edit"/>
 				</form>
 				<form class="sideBySide" action="BookAppServlet">
-					<input type="hidden" name="action" value="deleteBook"/>
+					<input type="hidden" name="action" value="confirmBookDelete"/>
 					<input type="hidden" name="bookId" value="${book.id}"/>
 					<input class="redButton"
 						   type="submit" 

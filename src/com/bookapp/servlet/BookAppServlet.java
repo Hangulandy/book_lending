@@ -334,7 +334,7 @@ public class BookAppServlet extends HttpServlet {
 						Book bookToEdit = BookDB.selectBookById(request.getParameter("bookIdToEdit"));
 
 						// Check that the book exists and person editing the book is the owner
-						if (bookToEdit != null && bookToEdit.getOwner().getId() == member.getId()) {
+						if (bookToEdit != null && bookToEdit.getOwner().getId().equals(member.getId())) {
 							url = "/editBook.jsp";
 
 							// No need to keep this in the session
@@ -363,7 +363,7 @@ public class BookAppServlet extends HttpServlet {
 					try {
 						Book oldBook = BookDB.selectBookById(request.getParameter("bookId"));
 
-						if (oldBook != null && oldBook.getOwner().getId() == member.getId()) {
+						if (oldBook != null && oldBook.getOwner().getId().equals(member.getId())) {
 							Book updatedBook = buildBookFromData(request, member);
 							// Get values from book before updating
 							updatedBook.setId(oldBook.getId());
@@ -390,6 +390,36 @@ public class BookAppServlet extends HttpServlet {
 				url = "/manage_books.jsp";
 				session.setAttribute("requestMessage", requestMessage);
 			}
+			
+			// ACTION: Confirm book delete
+			if (action.equalsIgnoreCase("confirmBookDelete")) {
+
+				String requestMessage = null;
+
+				if (memberLoginGood(member)) {
+					try {
+						Book bookToDelete = BookDB.selectBookById(request.getParameter("bookId"));
+
+						// Check that the book exists and person deleting the book is the owner
+						if (bookToDelete != null && bookToDelete.getOwner().getId().equals(member.getId())) {
+							url = "/deleteBook.jsp";
+
+							// No need to keep this in the session
+							request.setAttribute("bookToDelete", bookToDelete);
+						} else {
+							requestMessage = "Unable to delete book.";
+							url = "/manage_books.jsp";
+						}
+
+					} catch(Exception e) {
+						requestMessage = "Unable to delete book";
+						url = "/manage_books.jsp";
+					}
+				} else {
+					requestMessage = "You must login to delete a book.";
+				}
+				session.setAttribute("requestMessage", requestMessage);
+			}
 
 			// ACTION: Delete a book
 			if (action.equalsIgnoreCase("deleteBook")) {
@@ -401,13 +431,12 @@ public class BookAppServlet extends HttpServlet {
 						Book bookToDelete = BookDB.selectBookById(request.getParameter("bookId"));
 
 						if (bookToDelete != null && 
-								bookToDelete.getOwner().getId().compareTo(member.getId()) == 0) {
+								bookToDelete.getOwner().getId().equals(member.getId())) {
 
-							// Get stage 1 requests for deleted book and delete 
+							// delete all requests for book
 							TreeSet<Request> bookRequests = RequestDB.getRequestsToMe(member.getId());
 							bookRequests.stream().filter(req -> 
-									req.getBook().getId() == bookToDelete.getId() &&
-									req.getStage() == 1
+									req.getBook().getId() == bookToDelete.getId() 
 							)
 							.forEach(RequestDB::delete);
 
